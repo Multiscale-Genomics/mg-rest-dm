@@ -25,8 +25,8 @@ api = Api(app)
 
 class GetTracks(Resource):
     """
-    Class to handle the http requests for retrieving the list of chromosomes for
-    a given accession
+    Class to handle the http requests for retrieving the list of files for a
+    given user handle
     """
     
     def get(self):
