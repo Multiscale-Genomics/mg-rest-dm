@@ -55,7 +55,7 @@ Define the URIs and their matching methods
 api.add_resource(GetTracks, "/rest/v0.0/getTracks", endpoint='tracks')
 
 #   List the available assemblies for a given species with links
-api.add_resource(GetTrack, "/rest/v0.0/getTrack", endpoint='track')
+#api.add_resource(GetTrack, "/rest/v0.0/getTrack", endpoint='track')
 
 
 """
