@@ -29,20 +29,21 @@ class GetTracks(Resource):
     a given accession
     """
     
-    def get(self, user_id):
+    def get(self):
         da = dmp()
+        
+        # TODO Placeholder code
+        user_id = request.args.get('user_id')
         files = da.get_files_by_user(user_id, rest=True)
         
         return {
             '_links': {
                 'self': request.base_url,
-                'child': children,
-                'parent': request.url_root + 'rest/' + str(rp[2]) + '/' + str(rp[3]) + '/' + str(taxon_id) + '/' + str(accession_id)
             },
             'files': files
         }
 
-#
+# TODO
 # For the services where there needs to be an extra layer (adjacency lists),
 # then there needs to be a way of forwarding for this. But the majority of
 # things can be redirected to the raw files for use as a track.
