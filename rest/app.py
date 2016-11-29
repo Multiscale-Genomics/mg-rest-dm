@@ -98,7 +98,16 @@ class ping(Resource):
     """
     
     def get(self):
-        return "alive"
+        import release
+        res = {
+            "status":  "ready",
+            "version": release.__version__,
+            "author":  release.__author__,
+            "license": release.__license__,
+            "name":    release.__rest_name__,
+            "description": release.__description__
+        }
+        return res
 
 # TODO
 # For the services where there needs to be an extra layer (adjacency lists),
@@ -121,7 +130,7 @@ api.add_resource(GetTracks, "/rest/v0.0/getTracks", endpoint='tracks')
 api.add_resource(GetTrackHistory, "/rest/v0.0/getTrackHistory", endpoint='trackHistory')
 
 #   List file history
-api.add_resource(ping, "/rest/v0.0/dmp-ping", endpoint='dmp-ping')
+api.add_resource(ping, "/rest/dmp-ping", endpoint='dmp-ping')
 
 
 """
