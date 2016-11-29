@@ -15,6 +15,8 @@ limitations under the License.
 """
 
 from urllib2 import Request, urlopen, URLError
+from dmp import rest
+import json
 
 def ping(a, b):
     """
@@ -30,17 +32,29 @@ def ping(a, b):
     b : dict
         'a' is the registry key
     """
+    r = rest.rest()
     
     for service in b[str(a)]:
         req = Request(service["url"])
-        valid = True
+        status = "down"
         log = ""
+        data = {}
         try:
             response = urlopen(req)
             log = response.code
+            data = json.loads(response.read())
             response.close()
         except URLError, e:
             valid = False
             log = e.code
         
-        print service["name"] + " - " + str(log)
+        if log == 200:
+            status = "up"
+        
+        if r.is_service(service["name"]) == True:
+            r.set_service_status(service["name"], status)
+        else:
+            description = data["description"] if data.has_key("description") else ""
+            r.add_service(service["name"], service["url"], description, status)
+        
+        #print service["name"] + " - " + str(log)
