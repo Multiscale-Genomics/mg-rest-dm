@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-__rest_name__ = "Main DMP"
+__rest_name__ = "DMP"
 __description__ = "Main process for providing access to the DMP and checking REST APIs are available"
 __version__   = "v0.0"
 __author__    = "Mark McDowall"
