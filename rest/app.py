@@ -35,7 +35,7 @@ class Config(object):
             'func': 'jobs:ping',
             'args' : ("registry", data),
             'trigger': 'interval',
-            'seconds': 3
+            'seconds': 60
         }
     ]
 
