@@ -121,16 +121,16 @@ Define the URIs and their matching methods
 api = Api(app)
 
 #   List the available species for which there are datasets available
-api.add_resource(GetTracks, "/rest/v0.0/getTracks", endpoint='tracks')
+api.add_resource(GetTracks, "/api/getTracks", endpoint='tracks')
 
 #   List the available assemblies for a given species with links
-#api.add_resource(GetTrack, "/rest/v0.0/getTrack", endpoint='track')
+#api.add_resource(GetTrack, "/api/getTrack", endpoint='track')
 
 #   List file history
-api.add_resource(GetTrackHistory, "/rest/v0.0/getTrackHistory", endpoint='trackHistory')
+api.add_resource(GetTrackHistory, "/api/getTrackHistory", endpoint='trackHistory')
 
-#   List file history
-api.add_resource(ping, "/rest/dmp-ping", endpoint='dmp-ping')
+#   Service ping
+api.add_resource(ping, "/rest/dmp/ping", endpoint='dmp-ping')
 
 
 """
