@@ -32,7 +32,7 @@ class Config(object):
     JOBS = [
         {
             'id': 'ping',
-            'func': 'jobs:ping',
+            'func': 'rest.jobs:ping',
             'args' : ("registry", data),
             'trigger': 'interval',
             'seconds': 60
@@ -57,7 +57,7 @@ class GetTracks(Resource):
     """
     
     def get(self):
-        da = dmp.dmp(True)
+        da = dmp.dmp()
         
         # TODO Placeholder code
         user_id = request.args.get('user_id')
@@ -78,7 +78,7 @@ class GetTrackHistory(Resource):
     """
     
     def get(self):
-        da = dmp.dmp(True)
+        da = dmp.dmp()
         
         # TODO Placeholder code
         user_id = request.args.get('user_id')
@@ -130,7 +130,7 @@ api.add_resource(GetTracks, "/api/getTracks", endpoint='tracks')
 api.add_resource(GetTrackHistory, "/api/getTrackHistory", endpoint='trackHistory')
 
 #   Service ping
-api.add_resource(ping, "/rest/dmp/ping", endpoint='dmp-ping')
+api.add_resource(ping, "/api/dmp/ping", endpoint='dmp-ping')
 
 
 """
