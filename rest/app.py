@@ -166,9 +166,6 @@ api.add_resource(GetEndPoints, "/api/dmp", endpoint='dmp_root')
 #   List the available species for which there are datasets available
 api.add_resource(GetTracks, "/api/dmp/getTracks", endpoint='tracks')
 
-#   List the available assemblies for a given species with links
-#api.add_resource(GetTrack, "/api/getTrack", endpoint='track')
-
 #   List file history
 api.add_resource(GetTrackHistory, "/api/dmp/getTrackHistory", endpoint='trackHistory')
 
