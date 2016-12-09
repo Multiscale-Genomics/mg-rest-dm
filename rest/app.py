@@ -50,6 +50,43 @@ scheduler.init_app(app)
 scheduler.start()
 
 
+class GetRestEndPoints(Resource):
+    """
+    Class to handle the http requests for returning information about the end
+    points
+    """
+    
+    r = rest.rest()
+    services = rget_available_services()
+    
+    links = {'_self' : request.url_root + 'api'}
+    for service in services:
+        links['_' + service] = request.url_root + 'api/' + service
+    
+    def get(self):
+        return {
+            '_links': links
+        }
+
+
+class GetEndPoints(Resource):
+    """
+    Class to handle the http requests for returning information about the end
+    points
+    """
+    
+    def get(self):
+        return {
+            '_links': {
+                '_self': request.base_url,
+                '_getTracks': request.url_root + 'api/dmp/getTracks',
+                '_getTrackHistory': request.url_root + 'api/dmp/getTrackHistory',
+                '_ping': request.url_root + 'api/dmp/ping',
+                '_parent': request.url_root
+            }
+        }
+
+
 class GetTracks(Resource):
     """
     Class to handle the http requests for retrieving the list of files for a
@@ -120,14 +157,20 @@ Define the URIs and their matching methods
 """
 api = Api(app)
 
+#   List the available end points for this service
+api.add_resource(GetRestEndPoints, "/api", endpoint='rest_root')
+
+#   List the available end points for this service
+api.add_resource(GetEndPoints, "/api/dmp", endpoint='dmp_root')
+
 #   List the available species for which there are datasets available
-api.add_resource(GetTracks, "/api/getTracks", endpoint='tracks')
+api.add_resource(GetTracks, "/api/dmp/getTracks", endpoint='tracks')
 
 #   List the available assemblies for a given species with links
 #api.add_resource(GetTrack, "/api/getTrack", endpoint='track')
 
 #   List file history
-api.add_resource(GetTrackHistory, "/api/getTrackHistory", endpoint='trackHistory')
+api.add_resource(GetTrackHistory, "/api/dmp/getTrackHistory", endpoint='trackHistory')
 
 #   Service ping
 api.add_resource(ping, "/api/dmp/ping", endpoint='dmp-ping')
