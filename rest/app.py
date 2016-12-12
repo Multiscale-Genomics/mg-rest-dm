@@ -24,7 +24,6 @@ import logging
 logging.basicConfig()
 
 app = Flask(__name__)
-app.config.from_object(Config())
 
 
 class GetEndPoints(Resource):
