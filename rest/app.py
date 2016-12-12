@@ -23,50 +23,8 @@ from dmp import dmp
 import logging
 logging.basicConfig()
 
-class Config(object):
-    import json
-
-    with open('./registry.json') as data_file:    
-        data = json.load(data_file)
-    
-    JOBS = [
-        {
-            'id': 'ping',
-            'func': 'rest.jobs:ping',
-            'args' : ("registry", data),
-            'trigger': 'interval',
-            'seconds': 60
-        }
-    ]
-
-    SCHEDULER_VIEWS_ENABLED = True
-
-
 app = Flask(__name__)
 app.config.from_object(Config())
-
-scheduler = APScheduler()
-scheduler.init_app(app)
-scheduler.start()
-
-
-class GetRestEndPoints(Resource):
-    """
-    Class to handle the http requests for returning information about the end
-    points
-    """
-    
-    r = rest.rest()
-    services = rget_available_services()
-    
-    links = {'_self' : request.url_root + 'api'}
-    for service in services:
-        links['_' + service] = request.url_root + 'api/' + service
-    
-    def get(self):
-        return {
-            '_links': links
-        }
 
 
 class GetEndPoints(Resource):
@@ -82,7 +40,7 @@ class GetEndPoints(Resource):
                 '_getTracks': request.url_root + 'api/dmp/getTracks',
                 '_getTrackHistory': request.url_root + 'api/dmp/getTrackHistory',
                 '_ping': request.url_root + 'api/dmp/ping',
-                '_parent': request.url_root
+                '_parent': request.url_root + 'api'
             }
         }
 
@@ -156,9 +114,6 @@ class ping(Resource):
 Define the URIs and their matching methods
 """
 api = Api(app)
-
-#   List the available end points for this service
-api.add_resource(GetRestEndPoints, "/api", endpoint='rest_root')
 
 #   List the available end points for this service
 api.add_resource(GetEndPoints, "/api/dmp", endpoint='dmp_root')
