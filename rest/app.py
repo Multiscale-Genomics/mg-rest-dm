@@ -50,7 +50,7 @@ class GetTracks(Resource):
     """
     
     def get(self):
-        da = dmp.dmp()
+        da = dmp()
         
         # TODO Placeholder code
         user_id = request.args.get('user_id')
@@ -71,7 +71,7 @@ class GetTrackHistory(Resource):
     """
     
     def get(self):
-        da = dmp.dmp()
+        da = dmp()
         
         # TODO Placeholder code
         user_id = request.args.get('user_id')
