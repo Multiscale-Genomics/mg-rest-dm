@@ -16,7 +16,6 @@
 
 from flask import Flask, make_response, request
 from flask_restful import Api, Resource
-from flask_apscheduler import APScheduler
 
 from dmp import dmp
 
