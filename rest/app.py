@@ -19,7 +19,7 @@ from flask_restful import Api, Resource
 
 from dmp import dmp
 
-import logging
+import logging, os
 logging.basicConfig()
 
 app = Flask(__name__)
