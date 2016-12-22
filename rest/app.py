@@ -50,6 +50,7 @@ class GetTracks(Resource):
     """
     
     def get(self):
+        print os.path.dirname(os.path.abspath(__file__))
         da = dmp()
         
         # TODO Placeholder code
