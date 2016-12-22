@@ -50,8 +50,8 @@ class GetTracks(Resource):
     """
     
     def get(self):
-        print os.path.dirname(os.path.abspath(__file__))
-        da = dmp()
+        cnf_loc=os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+        da = dmp(cnf_loc)
         
         # TODO Placeholder code
         user_id = request.args.get('user_id')
@@ -72,7 +72,8 @@ class GetTrackHistory(Resource):
     """
     
     def get(self):
-        da = dmp()
+        cnf_loc=os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+        da = dmp(cnf_loc)
         
         # TODO Placeholder code
         user_id = request.args.get('user_id')
