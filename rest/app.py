@@ -51,7 +51,10 @@ class GetTracks(Resource):
     
     def usage(self, error_message, status_code, parameters = {}):
         usage = {
-                    '_links' : {'_self' : request.base_url},
+                    '_links' : {
+                        '_self' : request.base_url,
+                        '_parent' : request.url_root + 'api/dmp'
+                    },
                     'parameters' : {
                         'user_id' : ['User ID', 'str', 'REQUIRED'],
                         'file_id' : ['File ID', 'str', 'REQUIRED'],
@@ -90,7 +93,8 @@ class GetTracks(Resource):
         
         return {
             '_links': {
-                'self': request.base_url,
+                '_self': request.base_url,
+                '_parent' : request.url_root + 'api/dmp'
             },
             'files': files
         }
@@ -104,7 +108,10 @@ class GetTrackHistory(Resource):
     
     def usage(self, error_message, status_code, parameters = {}):
         usage = {
-                    '_links' : {'_self' : request.base_url},
+                    '_links' : {
+                        '_self' : request.base_url,
+                        '_parent' : request.url_root + 'api/dmp'
+                    },
                     'parameters' : {
                         'user_id' : ['User ID', 'str', 'REQUIRED'],
                         'file_id' : ['File ID', 'str', 'REQUIRED'],
@@ -145,7 +152,8 @@ class GetTrackHistory(Resource):
         
         return {
             '_links': {
-                'self': request.base_url,
+                '_self': request.base_url,
+                '_parent' : request.url_root + 'api/dmp'
             },
             'history_files': files
         }
