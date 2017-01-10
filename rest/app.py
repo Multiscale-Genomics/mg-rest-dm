@@ -173,7 +173,7 @@ class ping(Resource):
             "name":    release.__rest_name__,
             "description": release.__description__,
             "_links" : {
-                '_self' : request.url_root + 'api/dmp/ping'
+                '_self' : request.url_root + 'api/dmp/ping',
                 '_parent' : request.url_root + 'api/dmp'
             }
         }
