@@ -51,7 +51,7 @@ class GetTracks(Resource):
     
     def usage(self, error_message, status_code, parameters = {}):
         usage = {
-                    'link' : request.url,
+                    '_links' : {'_self' : request.base_url},
                     'parameters' : {
                         'user_id' : ['User ID', 'str', 'REQUIRED'],
                         'file_id' : ['File ID', 'str', 'REQUIRED'],
@@ -104,7 +104,7 @@ class GetTrackHistory(Resource):
     
     def usage(self, error_message, status_code, parameters = {}):
         usage = {
-                    'link' : request.url,
+                    '_links' : {'_self' : request.base_url},
                     'parameters' : {
                         'user_id' : ['User ID', 'str', 'REQUIRED'],
                         'file_id' : ['File ID', 'str', 'REQUIRED'],
