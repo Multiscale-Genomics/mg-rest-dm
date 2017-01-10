@@ -49,13 +49,44 @@ class GetTracks(Resource):
     given user handle
     """
     
+    def usage(self, error_message, status_code, parameters = {}):
+        usage = {
+                    'link' : request.url,
+                    'parameters' : {
+                        'user_id' : ['User ID', 'str', 'REQUIRED'],
+                        'file_id' : ['File ID', 'str', 'REQUIRED'],
+                    }
+                }
+        message = {
+                      'usage' : usage,
+                      'status_code' : status_code
+                  }
+
+        if len(parameters) > 0:
+            message['provided_parameters'] = parameters
+        
+        if error_message != None:
+            message['error'] = error_message
+
+        return message
+    
     def get(self):
         cnf_loc=os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         da = dmp(cnf_loc)
         
         # TODO Placeholder code
         user_id = request.args.get('user_id')
-        files = da.get_files_by_user(user_id, rest=True)
+        file_id = request.args.get('file_id')
+        
+        params = [user_id, file_id]
+
+        # Display the parameters available
+        if sum([x is None for x in params]) == len(params):
+            return self.usage(None, 200)
+        
+        # ERROR - one of the required parameters is NoneType
+        if sum([x is not None for x in params]) != len(params):
+            return self.usage('MissingParameters', 400, {'user_id' : user_id, 'file_id' : file_id}), 400
         
         return {
             '_links': {
@@ -71,6 +102,27 @@ class GetTrackHistory(Resource):
     a given file for a given user handle
     """
     
+    def usage(self, error_message, status_code, parameters = {}):
+        usage = {
+                    'link' : request.url,
+                    'parameters' : {
+                        'user_id' : ['User ID', 'str', 'REQUIRED'],
+                        'file_id' : ['File ID', 'str', 'REQUIRED'],
+                    }
+                }
+        message = {
+                      'usage' : usage,
+                      'status_code' : status_code
+                  }
+
+        if len(parameters) > 0:
+            message['provided_parameters'] = parameters
+        
+        if error_message != None:
+            message['error'] = error_message
+
+        return message
+    
     def get(self):
         cnf_loc=os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         da = dmp(cnf_loc)
@@ -78,6 +130,17 @@ class GetTrackHistory(Resource):
         # TODO Placeholder code
         user_id = request.args.get('user_id')
         file_id = request.args.get('file_id')
+        
+        params = [user_id, file_id]
+
+        # Display the parameters available
+        if sum([x is None for x in params]) == len(params):
+            return self.usage(None, 200)
+        
+        # ERROR - one of the required parameters is NoneType
+        if sum([x is not None for x in params]) != len(params):
+            return self.usage('MissingParameters', 400, {'user_id' : user_id, 'file_id' : file_id}), 400
+        
         files = da.get_files_history(file_id)
         
         return {
