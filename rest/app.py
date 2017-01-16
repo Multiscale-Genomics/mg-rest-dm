@@ -57,7 +57,6 @@ class GetTracks(Resource):
                     },
                     'parameters' : {
                         'user_id' : ['User ID', 'str', 'REQUIRED'],
-                        'file_id' : ['File ID', 'str', 'REQUIRED'],
                     }
                 }
         message = {
@@ -79,9 +78,8 @@ class GetTracks(Resource):
         
         # TODO Placeholder code
         user_id = request.args.get('user_id')
-        file_id = request.args.get('file_id')
         
-        params = [user_id, file_id]
+        params = [user_id]
 
         # Display the parameters available
         if sum([x is None for x in params]) == len(params):
@@ -89,7 +87,9 @@ class GetTracks(Resource):
         
         # ERROR - one of the required parameters is NoneType
         if sum([x is not None for x in params]) != len(params):
-            return self.usage('MissingParameters', 400, {'user_id' : user_id, 'file_id' : file_id}), 400
+            return self.usage('MissingParameters', 400, {'user_id' : user_id), 400
+        
+        files = da.get_files_by_user(user_id, rest=True)
         
         return {
             '_links': {
