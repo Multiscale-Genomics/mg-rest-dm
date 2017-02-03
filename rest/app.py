@@ -35,10 +35,10 @@ class GetEndPoints(Resource):
         return {
             '_links': {
                 '_self': request.base_url,
-                '_getTracks': request.url_root + 'api/dmp/getTracks',
-                '_getTrackHistory': request.url_root + 'api/dmp/getTrackHistory',
-                '_ping': request.url_root + 'api/dmp/ping',
-                '_parent': request.url_root + 'api'
+                '_getTracks': request.url_root + 'mug/api/dmp/getTracks',
+                '_getTrackHistory': request.url_root + 'mug/api/dmp/getTrackHistory',
+                '_ping': request.url_root + 'mug/api/dmp/ping',
+                '_parent': request.url_root + 'mug/api'
             }
         }
 
@@ -53,7 +53,7 @@ class GetTracks(Resource):
         usage = {
                     '_links' : {
                         '_self' : request.base_url,
-                        '_parent' : request.url_root + 'api/dmp'
+                        '_parent' : request.url_root + 'mug/api/dmp'
                     },
                     'parameters' : {
                         'user_id' : ['User ID', 'str', 'REQUIRED'],
@@ -94,7 +94,7 @@ class GetTracks(Resource):
         return {
             '_links': {
                 '_self': request.base_url,
-                '_parent' : request.url_root + 'api/dmp'
+                '_parent' : request.url_root + 'mug/api/dmp'
             },
             'files': files
         }
@@ -110,7 +110,7 @@ class GetTrackHistory(Resource):
         usage = {
                     '_links' : {
                         '_self' : request.base_url,
-                        '_parent' : request.url_root + 'api/dmp'
+                        '_parent' : request.url_root + 'mug/api/dmp'
                     },
                     'parameters' : {
                         'user_id' : ['User ID', 'str', 'REQUIRED'],
@@ -153,7 +153,7 @@ class GetTrackHistory(Resource):
         return {
             '_links': {
                 '_self': request.base_url,
-                '_parent' : request.url_root + 'api/dmp'
+                '_parent' : request.url_root + 'mug/api/dmp'
             },
             'history_files': files
         }
@@ -164,7 +164,7 @@ class ping(Resource):
     """
     
     def get(self):
-        import release
+        from . import release
         res = {
             "status":  "ready",
             "version": release.__version__,
@@ -173,8 +173,8 @@ class ping(Resource):
             "name":    release.__rest_name__,
             "description": release.__description__,
             "_links" : {
-                '_self' : request.url_root + 'api/dmp/ping',
-                '_parent' : request.url_root + 'api/dmp'
+                '_self' : request.base_url,
+                '_parent' : request.url_root + 'mug/api/dmp'
             }
         }
         return res
@@ -191,16 +191,16 @@ Define the URIs and their matching methods
 api = Api(app)
 
 #   List the available end points for this service
-api.add_resource(GetEndPoints, "/api/dmp", endpoint='dmp_root')
+api.add_resource(GetEndPoints, "/mug/api/dmp", endpoint='dmp_root')
 
 #   List the available species for which there are datasets available
-api.add_resource(GetTracks, "/api/dmp/getTracks", endpoint='tracks')
+api.add_resource(GetTracks, "/mug/api/dmp/getTracks", endpoint='tracks')
 
 #   List file history
-api.add_resource(GetTrackHistory, "/api/dmp/getTrackHistory", endpoint='trackHistory')
+api.add_resource(GetTrackHistory, "/mug/api/dmp/getTrackHistory", endpoint='trackHistory')
 
 #   Service ping
-api.add_resource(ping, "/api/dmp/ping", endpoint='dmp-ping')
+api.add_resource(ping, "/mug/api/dmp/ping", endpoint='dmp-ping')
 
 
 """
