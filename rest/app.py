@@ -87,7 +87,7 @@ class GetTracks(Resource):
         
         # ERROR - one of the required parameters is NoneType
         if sum([x is not None for x in params]) != len(params):
-            return self.usage('MissingParameters', 400, {'user_id' : user_id), 400
+            return self.usage('MissingParameters', 400, {'user_id' : user_id})
         
         files = da.get_files_by_user(user_id, rest=True)
         
