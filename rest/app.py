@@ -43,6 +43,76 @@ class GetEndPoints(Resource):
         }
 
 
+class GetTrack(Resource):
+    """
+    Class to handle the http requests for retrieving the data from a track file.
+    This class is able to handle big[Bed|Wig] file and serve back the matching 
+    region in the relevant format.
+    """
+
+    def usage(self, error_message, status_code, parameters = {}):
+        usage = {
+            '_links' : {
+                '_self' : request.base_url,
+                '_parent' : request.url_root + 'mug/api/dmp'
+            },
+            'parameters' : {
+                'user_id' : ['User ID', 'str', 'REQUIRED'],
+                'file_id' : ['File ID', 'str', 'REQUIRED'],
+                'chrom'   : ['Chromosome', 'str', 'REQUIRED'],
+                'start'   : ['Start', 'int', 'REQUIRED'],
+                'end'   : ['End', 'int', 'REQUIRED']
+            }
+        }
+        message = {
+            'usage' : usage,
+            'status_code' : status_code
+        }
+
+        if len(parameters) > 0:
+            message['provided_parameters'] = parameters
+        
+        if error_message != None:
+            message['error'] = error_message
+
+        return message
+
+
+    def get(self):
+        """
+        """
+        cnf_loc=os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+        da = dmp(cnf_loc)
+        
+        # TODO Placeholder code
+        user_id = request.args.get('user_id')
+        file_id = request.args.get('file_id')
+        chrom = request.args.get('chrom')
+        start = request.args.get('start')
+        end   = request.args.get('end')
+        
+        params = [user_id, file_id, chrom, start, end]
+
+        # Display the parameters available
+        if sum([x is None for x in params]) == len(params):
+            return self.usage(None, 200)
+        
+        # ERROR - one of the required parameters is NoneType
+        if sum([x is not None for x in params]) != len(params):
+            return self.usage('MissingParameters', 400, {'user_id' : user_id})
+
+        file_obj = da.get_file_by_id(user_id, file_id, rest=True)
+
+        output_str = ''
+        if file_obj['file_type'] in ['bed', 'bigbed']:
+            bbr = da.reader.bigbed_reader(user_id, file_id)
+            output_str = bbr.get_range(chromosome, start, end, 'bed')
+        elif if file_obj['file_type'] in ['wig', 'bigwig']:
+            bwr = da.reader.bigwig_reader(user_id, file_id)
+            output_str = bwr.get_range(chromosome, start, end, 'wig')
+
+        return output_str
+
 class GetTracks(Resource):
     """
     Class to handle the http requests for retrieving the list of files for a
