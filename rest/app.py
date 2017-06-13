@@ -172,7 +172,8 @@ class Track(Resource):
 
         Parameters
         ^^^^^^^^^^
-        entry : str
+        This should be passed as the data block with the HTTP request:
+        dict
             JSON string describing the file that is to get inserted into the DM
             API.
             user_id : str
@@ -251,7 +252,8 @@ class Track(Resource):
 
         Parameters
         ^^^^^^^^^^
-        entry : dict
+        This should be passed as the data block with the HTTP request:
+        dict
             JSON string describing the file  and the meta data that is to get
             modified within the DM API.
             user_id : str
@@ -303,7 +305,8 @@ class Track(Resource):
 
         Parameters
         ^^^^^^^^^^
-        entry : dict
+        This should be passed as the data block with the HTTP request:
+        dict
             JSON string describing the file that is to be removed from the DM
             API.
             user_id : str
@@ -331,7 +334,14 @@ class Tracks(Resource):
 
     def get(self):
         """
-        GET the list of tracks assocuected to a user
+        GET List user tracks
+        --------------------
+
+        Function to list the tracks that are owned by a single user.
+
+        Parameters
+        ^^^^^^^^^^
+
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
