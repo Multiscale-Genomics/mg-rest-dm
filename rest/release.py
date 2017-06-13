@@ -15,8 +15,10 @@
 """
 
 __rest_name__ = "DMP"
-__description__ = "Main process for providing access to the DMP and checking REST APIs are available"
-__version__   = "v0.0"
-__author__    = "Mark McDowall"
-__license__   = "Apache 2.0"
-
+__description__ = """
+Main process for providing access to the DMP and checking REST APIs are
+available
+"""
+__version__ = "v0.0"
+__author__ = "Mark McDowall"
+__license__ = "Apache 2.0"
