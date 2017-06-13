@@ -82,7 +82,7 @@ class EndPoints(Resource):
         .. code-block::
            :linenos:
 
-           wget localhost:5001/mug/api/dmp/ping
+           curl -X GET http://localhost:5001/mug/api/dmp
         """
         return {
             '_links': {
@@ -136,7 +136,7 @@ class Track(Resource):
         .. code-block::
            :linenos:
 
-           wget localhost:5001/mug/api/dmp/track?user_id=test&file_id=test_file&chrom=1&start=1000&end=2000
+           curl -X GET http://localhost:5001/mug/api/dmp/track?user_id=test&file_id=test_file&chrom=1&start=1000&end=2000
 
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
@@ -222,7 +222,7 @@ class Track(Resource):
         .. code-block::
            :linenos:
 
-           wget localhost:5001/mug/api/dmp/
+           curl -X POST -H "Content-Type: application/json" -d '{"user_id": "test_user", "data_type": "RNA-seq", "file_type": "fastq", "source_id": [], "meta_data": {"assembly" : "GCA_nnnnnnnn.nn"}, "taxon_id": 9606, "file_path": "/tmp/test/path/RNA-seq/testing_123.fastq"}' http://localhost:5001/mug/api/dmp/track
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -294,10 +294,17 @@ class Track(Resource):
 
         Example
         ^^^^^^^
+        To add a new key value pair:
         .. code-block::
            :linenos:
 
-           wget localhost:5001/mug/api/dmp/ping
+           curl -X PUT -H "Content-Type: application/json" -d '{"type":"add_meta", "file_id":"<file_id>", "user_id":"test_user", "meta_data":{"citation":"PMID:1234567890"}}' http://localhost:5001/mug/api/dmp/track
+
+        To remove a key value pair:
+        .. code-block::
+           :linenos:
+
+           curl -X PUT -H "Content-Type: application/json" -d '{"type":"remove_meta", "file_id":"<file_id>", "user_id":"test_user", "meta_data":["citation"]}' http://localhost:5001/mug/api/dmp/track
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -345,7 +352,7 @@ class Track(Resource):
         .. code-block::
            :linenos:
 
-           wget localhost:5001/mug/api/dmp/
+           curl -X DELETE -H "Content-Type: application/json" -d '{"file_id":"<file_id>", "user_id":"test_user"}' http://localhost:5001/mug/api/dmp/track
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -382,7 +389,7 @@ class Tracks(Resource):
         .. code-block::
            :linenos:
 
-           wget localhost:5001/mug/api/dmp/
+           curl -X GET http://localhost:5001/mug/api/dmp/
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -426,7 +433,7 @@ class TrackHistory(Resource):
         .. code-block::
            :linenos:
 
-           wget localhost:5001/mug/api/dmp/
+           curl -X GET http://localhost:5001/mug/api/dmp/getTrackHistory?user_id=<user_id>&file_id=<file_id>
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -476,7 +483,7 @@ class Ping(Resource):
         .. code-block::
            :linenos:
 
-           wget localhost:5001/mug/api/dmp/ping
+           curl -X GET http://localhost:5001/mug/api/dmp/ping
 
 
         """
