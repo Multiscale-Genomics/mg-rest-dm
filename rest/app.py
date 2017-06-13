@@ -72,7 +72,17 @@ class EndPoints(Resource):
 
     def get(self):
         """
-        GET a list of potential end points from the server
+        GET list all end points
+        -----------------------
+
+        List of all of the end points for the current service.
+
+        Example
+        ^^^^^^^
+        .. code-block::
+           :linenos:
+
+           wget localhost:5001/mug/api/dmp/ping
         """
         return {
             '_links': {
@@ -173,6 +183,7 @@ class Track(Resource):
         Parameters
         ^^^^^^^^^^
         This should be passed as the data block with the HTTP request:
+
         dict
             JSON string describing the file that is to get inserted into the DM
             API.
@@ -205,6 +216,13 @@ class Track(Resource):
         ^^^^^^^
         file_id
             Returns the id of the stored file
+
+        Example
+        ^^^^^^^
+        .. code-block::
+           :linenos:
+
+           wget localhost:5001/mug/api/dmp/
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -253,6 +271,7 @@ class Track(Resource):
         Parameters
         ^^^^^^^^^^
         This should be passed as the data block with the HTTP request:
+        
         dict
             JSON string describing the file  and the meta data that is to get
             modified within the DM API.
@@ -272,6 +291,13 @@ class Track(Resource):
         ^^^^^^^
         file_id
             Returns the id of the stored file
+
+        Example
+        ^^^^^^^
+        .. code-block::
+           :linenos:
+
+           wget localhost:5001/mug/api/dmp/ping
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -313,6 +339,13 @@ class Track(Resource):
                 User identifier
             file_id : str
                 ID of the stored file
+
+        Example
+        ^^^^^^^
+        .. code-block::
+           :linenos:
+
+           wget localhost:5001/mug/api/dmp/
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -342,6 +375,14 @@ class Tracks(Resource):
         Parameters
         ^^^^^^^^^^
 
+
+
+        Example
+        ^^^^^^^
+        .. code-block::
+           :linenos:
+
+           wget localhost:5001/mug/api/dmp/
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -378,7 +419,14 @@ class TrackHistory(Resource):
 
     def get(self):
         """
-        GET the list of files that were used for generating the defined. file
+        GET the list of files that were used for generating the defined file
+
+        Example
+        ^^^^^^^
+        .. code-block::
+           :linenos:
+
+           wget localhost:5001/mug/api/dmp/
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -417,7 +465,20 @@ class Ping(Resource):
 
     def get(self):
         """
-        GET the current status of the service
+        GET Status
+        ----------
+
+        List the current status of the service along with the relevant
+        information about the version.
+
+        Example
+        ^^^^^^^
+        .. code-block::
+           :linenos:
+
+           wget localhost:5001/mug/api/dmp/ping
+
+
         """
         from . import release
         res = {
