@@ -389,7 +389,7 @@ class Tracks(Resource):
         .. code-block::
            :linenos:
 
-           curl -X GET http://localhost:5001/mug/api/dmp/
+           curl -X GET http://localhost:5001/mug/api/dmp/getTracks?user_id=<user_id>
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
