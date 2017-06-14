@@ -31,7 +31,31 @@ logging.basicConfig()
 def help_usage(error_message, status_code,
                parameters_required, parameters_provided):
     """
-    Descrition of the basic usage pattern for GET functions for the app.
+    Usage Help
+
+    Description of the basic usage patterns for GET functions for the app, 
+    including any parameters that were provided byt he user along with the 
+    available parameters that are required/optional.
+
+    Parameters
+    ----------
+    error_message : str | None
+        Error message detailing what has gone wrong. If there are no errors then
+        None should be passed.
+    status_code : int
+        HTTP status code.
+    parameters_required : list
+        List of the text names for each paramter required by the end point. An
+        empty list should be provided if there are no parameters required
+    parameters_provided : dict
+        Dictionary of the parameters and the matching values provided by the
+        user. An empyt dictionary should be passed if there were no parameters
+        provided by the user.
+
+    Returns
+    -------
+    str
+        JSON formated status message to display to the user
     """
     parameters = {
         'user_id' : ['User ID', 'str', 'REQUIRED'],
@@ -73,16 +97,16 @@ class EndPoints(Resource):
     def get(self):
         """
         GET list all end points
-        -----------------------
 
         List of all of the end points for the current service.
 
         Example
-        ^^^^^^^
-        .. code-block::
+        -------
+        .. code-block:: none
            :linenos:
 
            curl -X GET http://localhost:5001/mug/api/dmp
+
         """
         return {
             '_links': {
@@ -106,13 +130,12 @@ class Track(Resource):
     def get(self):
         """
         GET  List values from the file
-        ------------------------------
 
         Call to optain regions from the conpressed index files for Bed, Wig and
         TSV based file formats that contain genomic information
 
         Parameters
-        ^^^^^^^^^^
+        ----------
         user_id : str
             User ID
         file_id : str
@@ -126,14 +149,14 @@ class Track(Resource):
             End position for a selected region
 
         Returns
-        ^^^^^^^
+        -------
         file
             Returns a formated in the relevant file type with any genomic
             features matching the format of the file.
 
         Examples
-        ^^^^^^^^
-        .. code-block::
+        --------
+        .. code-block:: none
            :linenos:
 
            curl -X GET http://localhost:5001/mug/api/dmp/track?user_id=test&file_id=test_file&chrom=1&start=1000&end=2000
@@ -175,18 +198,15 @@ class Track(Resource):
     def post(self):
         """
         POST Add a new file to the DM API
-        ------------------------------
 
         Call to optain regions from the conpressed index files for Bed, Wig and
         TSV based file formats that contain genomic information
 
         Parameters
-        ^^^^^^^^^^
+        ----------
         This should be passed as the data block with the HTTP request:
 
-        dict
-            JSON string describing the file that is to get inserted into the DM
-            API.
+        json : dict
             user_id : str
                 User identifier
             file_path : str
@@ -213,16 +233,17 @@ class Track(Resource):
                 including the assembly if relevant
 
         Returns
-        ^^^^^^^
+        -------
         file_id
             Returns the id of the stored file
 
         Example
-        ^^^^^^^
-        .. code-block::
+        -------
+        .. code-block:: none
            :linenos:
 
            curl -X POST -H "Content-Type: application/json" -d '{"user_id": "test_user", "data_type": "RNA-seq", "file_type": "fastq", "source_id": [], "meta_data": {"assembly" : "GCA_nnnnnnnn.nn"}, "taxon_id": 9606, "file_path": "/tmp/test/path/RNA-seq/testing_123.fastq"}' http://localhost:5001/mug/api/dmp/track
+
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -263,18 +284,15 @@ class Track(Resource):
     def put(self):
         """
         PUT Update meta data
-        --------------------
 
         Request to update the meta data for a given file. This allows for the
         adding or removal of key-value pairs from the meta data.
 
         Parameters
-        ^^^^^^^^^^
+        ----------
         This should be passed as the data block with the HTTP request:
         
-        dict
-            JSON string describing the file  and the meta data that is to get
-            modified within the DM API.
+        json : dict
             user_id : str
                 User identifier
             file_id : str
@@ -288,23 +306,26 @@ class Track(Resource):
                 are to be added
 
         Returns
-        ^^^^^^^
+        -------
         file_id
             Returns the id of the stored file
 
         Example
-        ^^^^^^^
+        -------
         To add a new key value pair:
-        .. code-block::
+        
+        .. code-block:: none
            :linenos:
 
            curl -X PUT -H "Content-Type: application/json" -d '{"type":"add_meta", "file_id":"<file_id>", "user_id":"test_user", "meta_data":{"citation":"PMID:1234567890"}}' http://localhost:5001/mug/api/dmp/track
 
         To remove a key value pair:
-        .. code-block::
+        
+        .. code-block:: none
            :linenos:
 
            curl -X PUT -H "Content-Type: application/json" -d '{"type":"remove_meta", "file_id":"<file_id>", "user_id":"test_user", "meta_data":["citation"]}' http://localhost:5001/mug/api/dmp/track
+
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -330,29 +351,27 @@ class Track(Resource):
     def delete(self):
         """
         DELETE Remove a file from the DM API
-        ------------------------------------
 
         Function to remove the file from teh DM API. This will result in the
         file being removed from the records and therefore not available within
         the VRE or from the RESTful interface
 
         Parameters
-        ^^^^^^^^^^
+        ----------
         This should be passed as the data block with the HTTP request:
-        dict
-            JSON string describing the file that is to be removed from the DM
-            API.
+        json : dict
             user_id : str
                 User identifier
             file_id : str
                 ID of the stored file
 
         Example
-        ^^^^^^^
-        .. code-block::
+        -------
+        .. code-block:: none
            :linenos:
 
            curl -X DELETE -H "Content-Type: application/json" -d '{"file_id":"<file_id>", "user_id":"test_user"}' http://localhost:5001/mug/api/dmp/track
+
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -375,21 +394,21 @@ class Tracks(Resource):
     def get(self):
         """
         GET List user tracks
-        --------------------
 
         Function to list the tracks that are owned by a single user.
 
         Parameters
-        ^^^^^^^^^^
+        ----------
 
 
 
         Example
-        ^^^^^^^
-        .. code-block::
+        -------
+        .. code-block:: none
            :linenos:
 
            curl -X GET http://localhost:5001/mug/api/dmp/getTracks?user_id=<user_id>
+
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         dmp_api = dmp(cnf_loc)
@@ -429,8 +448,8 @@ class TrackHistory(Resource):
         GET the list of files that were used for generating the defined file
 
         Example
-        ^^^^^^^
-        .. code-block::
+        -------
+        .. code-block:: none
            :linenos:
 
            curl -X GET http://localhost:5001/mug/api/dmp/getTrackHistory?user_id=<user_id>&file_id=<file_id>
@@ -473,18 +492,16 @@ class Ping(Resource):
     def get(self):
         """
         GET Status
-        ----------
 
         List the current status of the service along with the relevant
         information about the version.
 
         Example
-        ^^^^^^^
-        .. code-block::
+        -------
+        .. code-block:: none
            :linenos:
 
            curl -X GET http://localhost:5001/mug/api/dmp/ping
-
 
         """
         from . import release
