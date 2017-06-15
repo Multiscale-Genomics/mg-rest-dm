@@ -1,6 +1,8 @@
 # mg-rest-dm
 RESTful access to the DMP
 
+[![Documentation Status](https://readthedocs.org/projects/mg-rest-dm/badge/?version=latest)](http://mg-rest-dm.readthedocs.org/en/latest/)
+
 # Requirements
 - Mongo DB 3.2
 - Python 2.7.10+
