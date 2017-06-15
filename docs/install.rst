@@ -52,7 +52,7 @@ Setting up a server
 
    cd mg-rest-dm
    pyenv virtualenv 2.7.12 mg-rest-dm
-   pyenv activate mg-rest-service
+   pyenv activate mg-rest-dm
    pip install git+https://github.com/Multiscale-Genomics/mg-dm-api.git
    pip install -e .
    pyenv deactivate
