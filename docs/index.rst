@@ -13,6 +13,7 @@ Welcome to mg-rest-dm's documentation!
    install
    app
    adr
+   license
 
 
 
