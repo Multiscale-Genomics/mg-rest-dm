@@ -18,7 +18,7 @@ import json
 import os
 import logging
 
-from flask import Flask, make_response, request
+from flask import Flask, request #, make_response
 from flask_restful import Api, Resource
 
 from dmp import dmp
@@ -33,8 +33,8 @@ def help_usage(error_message, status_code,
     """
     Usage Help
 
-    Description of the basic usage patterns for GET functions for the app, 
-    including any parameters that were provided byt he user along with the 
+    Description of the basic usage patterns for GET functions for the app,
+    including any parameters that were provided byt he user along with the
     available parameters that are required/optional.
 
     Parameters
@@ -163,7 +163,10 @@ class Track(Resource):
 
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-        dmp_api = dmp(cnf_loc)
+        if os.path.isfile(cnf_loc) is True:
+            dmp_api = dmp(cnf_loc)
+        else:
+            dmp_api = dmp(cnf_loc, test=True)
 
         # TODO Placeholder code
         user_id = request.args.get('user_id')
@@ -246,7 +249,10 @@ class Track(Resource):
 
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-        dmp_api = dmp(cnf_loc)
+        if os.path.isfile(cnf_loc) is True:
+            dmp_api = dmp(cnf_loc)
+        else:
+            dmp_api = dmp(cnf_loc, test=True)
 
         new_track = json.loads(request.data)
         user_id = new_track['user_id'] if 'user_id' in new_track else None
@@ -291,7 +297,7 @@ class Track(Resource):
         Parameters
         ----------
         This should be passed as the data block with the HTTP request:
-        
+
         json : dict
             user_id : str
                 User identifier
@@ -313,14 +319,14 @@ class Track(Resource):
         Example
         -------
         To add a new key value pair:
-        
+
         .. code-block:: none
            :linenos:
 
            curl -X PUT -H "Content-Type: application/json" -d '{"type":"add_meta", "file_id":"<file_id>", "user_id":"test_user", "meta_data":{"citation":"PMID:1234567890"}}' http://localhost:5001/mug/api/dmp/track
 
         To remove a key value pair:
-        
+
         .. code-block:: none
            :linenos:
 
@@ -328,10 +334,13 @@ class Track(Resource):
 
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-        dmp_api = dmp(cnf_loc)
+        if os.path.isfile(cnf_loc) is True:
+            dmp_api = dmp(cnf_loc)
+        else:
+            dmp_api = dmp(cnf_loc, test=True)
 
         data_put = json.loads(request.data)
-        user_id = data_put['user_id']
+        #user_id = data_put['user_id']
         file_id = data_put['file_id']
 
         params_required = ['user_id', 'file_id', 'type']
@@ -374,7 +383,10 @@ class Track(Resource):
 
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-        dmp_api = dmp(cnf_loc)
+        if os.path.isfile(cnf_loc) is True:
+            dmp_api = dmp(cnf_loc)
+        else:
+            dmp_api = dmp(cnf_loc, test=True)
 
         params_required = ['user_id', 'file_id']
         data_delete = json.loads(request.data)
@@ -411,20 +423,24 @@ class Tracks(Resource):
 
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-        dmp_api = dmp(cnf_loc)
+        if os.path.isfile(cnf_loc) is True:
+            dmp_api = dmp(cnf_loc)
+        else:
+            dmp_api = dmp(cnf_loc, test=True)
 
         # TODO Placeholder code
         user_id = request.args.get('user_id')
 
+        params_required = ['user_id']
         params = [user_id]
 
         # Display the parameters available
         if sum([x is None for x in params]) == len(params):
-            return help_usage(None, 200, [], {})
+            return help_usage(None, 200, params_required, {})
 
         # ERROR - one of the required parameters is NoneType
         if sum([x is not None for x in params]) != len(params):
-            return help_usage('MissingParameters', 400, [], {'user_id' : user_id})
+            return help_usage('MissingParameters', 400, params_required, {'user_id' : user_id})
 
         files = dmp_api.get_files_by_user(user_id, rest=True)
 
@@ -452,11 +468,15 @@ class TrackHistory(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X GET http://localhost:5001/mug/api/dmp/getTrackHistory?user_id=<user_id>&file_id=<file_id>
+           curl -X GET http://localhost:5001/mug/api/dmp/trackHistory?user_id=<user_id>&file_id=<file_id>
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-        dmp_api = dmp(cnf_loc)
-            # TODO Placeholder code
+        if os.path.isfile(cnf_loc) is True:
+            dmp_api = dmp(cnf_loc)
+        else:
+            dmp_api = dmp(cnf_loc, test=True)
+
+        # TODO Placeholder code
         user_id = request.args.get('user_id')
         file_id = request.args.get('file_id')
 
