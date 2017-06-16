@@ -5,7 +5,7 @@ setup(
     packages=['rest'],
     include_package_data=True,
     install_requires=[
-        'flask', 'flask_restful', 'waitress'
+        'flask', 'flask_restful', 'waitress', 'pytest', 'pylint'
     ],
     setup_requires=[
         'pytest-runner',
