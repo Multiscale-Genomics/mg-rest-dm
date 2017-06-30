@@ -1,4 +1,5 @@
 flask
 flask_restful
 waitress
+pyBigWig
 git+git://github.com/Multiscale-Genomics/mg-dm-api.git
