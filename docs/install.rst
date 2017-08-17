@@ -47,7 +47,7 @@ Setting up a server
 ^^^^^^^^^^^^^^^^^^^
 .. code-block:: none
    :linenos:
-   
+
    git clone https://github.com/Multiscale-Genomics/mg-rest-dm.git
 
    cd mg-rest-dm
