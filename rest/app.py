@@ -18,12 +18,12 @@ import json
 import os
 import logging
 
-from flask import Flask, request #, make_response
+from flask import Flask, request, make_response
 from flask_restful import Api, Resource
 
 from dmp import dmp
-from reader import bigbed
-from reader import bigwig
+from reader.bigbed import bigbed_reader
+from reader.bigwig import bigwig_reader
 
 APP = Flask(__name__)
 logging.basicConfig()
@@ -105,7 +105,7 @@ class EndPoints(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X GET http://localhost:5001/mug/api/dmp
+           curl -X GET http://localhost:5002/mug/api/dmp
 
         """
         return {
@@ -159,7 +159,7 @@ class Track(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X GET http://localhost:5001/mug/api/dmp/track?user_id=test&file_id=test_file&chrom=1&start=1000&end=2000
+           curl -X GET http://localhost:5002/mug/api/dmp/track?user_id=test&file_id=test_file&chrom=1&start=1000&end=2000
 
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
@@ -180,23 +180,27 @@ class Track(Resource):
 
         # Display the parameters available
         if sum([x is None for x in params]) == len(params):
-            return help_usage(None, 200, [], {})
+            return help_usage(None, 200, params_requried, {})
 
         # ERROR - one of the required parameters is NoneType
         if sum([x is not None for x in params]) != len(params):
             return help_usage('MissingParameters', 400, params_requried, {'user_id' : user_id})
 
-        file_obj = dmp_api.get_file_by_id(user_id, file_id, rest=True)
+        file_obj = dmp_api.get_file_by_id(user_id, file_id)
 
         output_str = ''
-        if file_obj['file_type'] in ['bed', 'bigbed']:
-            bbr = bigbed.bigbed_reader(user_id, file_id)
+        if file_obj['file_type'] in ['bed', 'bb']:
+            bbr = bigbed_reader(file_obj['file_path'])
             output_str = bbr.get_range(chrom, start, end, 'bed')
-        elif file_obj['file_type'] in ['wig', 'bigwig']:
-            bwr = bigwig.bigwig_reader(user_id, file_id)
+        elif file_obj['file_type'] in ['wig', 'bw']:
+            print(chrom, start, end, 'wig')
+            bwr = bigwig_reader(file_obj['file_path'])
             output_str = bwr.get_range(chrom, start, end, 'wig')
 
-        return output_str
+        resp = make_response(output_str, 'application/tsv')
+        resp.headers["Content-Type"] = "text"
+
+        return resp
 
     def post(self):
         """
@@ -245,7 +249,7 @@ class Track(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X POST -H "Content-Type: application/json" -d '{"user_id": "test_user", "data_type": "RNA-seq", "file_type": "fastq", "source_id": [], "meta_data": {"assembly" : "GCA_nnnnnnnn.nn"}, "taxon_id": 9606, "file_path": "/tmp/test/path/RNA-seq/testing_123.fastq"}' http://localhost:5001/mug/api/dmp/track
+           curl -X POST -H "Content-Type: application/json" -d '{"user_id": "test_user", "data_type": "RNA-seq", "file_type": "fastq", "source_id": [], "meta_data": {"assembly" : "GCA_nnnnnnnn.nn"}, "taxon_id": 9606, "file_path": "/tmp/test/path/RNA-seq/testing_123.fastq"}' http://localhost:5002/mug/api/dmp/track
 
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
@@ -323,14 +327,14 @@ class Track(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X PUT -H "Content-Type: application/json" -d '{"type":"add_meta", "file_id":"<file_id>", "user_id":"test_user", "meta_data":{"citation":"PMID:1234567890"}}' http://localhost:5001/mug/api/dmp/track
+           curl -X PUT -H "Content-Type: application/json" -d '{"type":"add_meta", "file_id":"<file_id>", "user_id":"test_user", "meta_data":{"citation":"PMID:1234567890"}}' http://localhost:5002/mug/api/dmp/track
 
         To remove a key value pair:
 
         .. code-block:: none
            :linenos:
 
-           curl -X PUT -H "Content-Type: application/json" -d '{"type":"remove_meta", "file_id":"<file_id>", "user_id":"test_user", "meta_data":["citation"]}' http://localhost:5001/mug/api/dmp/track
+           curl -X PUT -H "Content-Type: application/json" -d '{"type":"remove_meta", "file_id":"<file_id>", "user_id":"test_user", "meta_data":["citation"]}' http://localhost:5002/mug/api/dmp/track
 
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
@@ -379,7 +383,7 @@ class Track(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X DELETE -H "Content-Type: application/json" -d '{"file_id":"<file_id>", "user_id":"test_user"}' http://localhost:5001/mug/api/dmp/track
+           curl -X DELETE -H "Content-Type: application/json" -d '{"file_id":"<file_id>", "user_id":"test_user"}' http://localhost:5002/mug/api/dmp/track
 
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
@@ -419,17 +423,21 @@ class Tracks(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X GET http://localhost:5001/mug/api/dmp/getTracks?user_id=<user_id>
+           curl -X GET http://localhost:5002/mug/api/dmp/getTracks?user_id=<user_id>
 
         """
-        cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-        if os.path.isfile(cnf_loc) is True:
-            dmp_api = dmp(cnf_loc)
-        else:
-            dmp_api = dmp(cnf_loc, test=True)
-
         # TODO Placeholder code
         user_id = request.args.get('user_id')
+
+        cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+
+        print("USER ID:", user_id)
+        if os.path.isfile(cnf_loc) is True:
+            print("LIVE DM API")
+            dmp_api = dmp(cnf_loc)
+        else:
+            print("TEST DM API")
+            dmp_api = dmp(cnf_loc, test=True)
 
         params_required = ['user_id']
         params = [user_id]
@@ -468,7 +476,7 @@ class TrackHistory(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X GET http://localhost:5001/mug/api/dmp/trackHistory?user_id=<user_id>&file_id=<file_id>
+           curl -X GET http://localhost:5002/mug/api/dmp/trackHistory?user_id=<user_id>&file_id=<file_id>
         """
         cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
         if os.path.isfile(cnf_loc) is True:
@@ -521,7 +529,7 @@ class Ping(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X GET http://localhost:5001/mug/api/dmp/ping
+           curl -X GET http://localhost:5002/mug/api/dmp/ping
 
         """
         from . import release
@@ -567,4 +575,4 @@ REST_API.add_resource(Ping, "/mug/api/dmp/ping", endpoint='dmp-ping')
 
 # Initialise the server
 if __name__ == "__main__":
-    APP.run(port=5001, debug=True, use_reloader=False)
+    APP.run(port=5002, debug=True, use_reloader=False)
