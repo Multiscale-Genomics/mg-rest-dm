@@ -77,7 +77,7 @@ Starting the service:
 .. code-block:: none
    :linenos:
 
-   nohup ${PATH_2_PYENV}/versions/2.7.12/envs/mg-rest-dm/bin/waitress-serve --listen=127.0.0.1:5002 rest.app:app &
+   nohup ${PATH_2_PYENV}/versions/2.7.12/envs/mg-rest-dm/bin/waitress-serve --listen=127.0.0.1:5002 rest.app:APP &
 
 Testing
 ---------
