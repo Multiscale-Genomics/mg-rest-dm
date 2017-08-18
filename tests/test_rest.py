@@ -77,14 +77,6 @@ def test_tracks(client):
     details = json.loads(rest_value.data)
     #print(details)
     assert 'usage' in details
-
-def test_tracks_00(client):
-    """
-    Test that there are parameters specified
-    """
-    rest_value = client.get('/mug/api/dmp/tracks')
-    details = json.loads(rest_value.data)
-    #print(details)
     assert len(details['usage']['parameters']) is not 0
 
 def test_tracks_01(client):
