@@ -14,6 +14,8 @@
    limitations under the License.
 """
 
+from __future__ import print_function, unicode_literals
+
 import json
 import os
 import logging
@@ -532,7 +534,7 @@ class Ping(Resource):
            curl -X GET http://localhost:5002/mug/api/dmp/ping
 
         """
-        from . import release
+        import rest.release as release
         res = {
             "status":  "ready",
             "version": release.__version__,
