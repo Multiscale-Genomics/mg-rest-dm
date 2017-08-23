@@ -80,25 +80,6 @@ def test_tracks(client):
     assert 'usage' in details
     assert len(details['usage']['parameters']) is not 0
 
-def test_tracks_01(client):
-    """
-    Test that specifying a user_id returns information
-    """
-    rest_value = client.get('/mug/api/dmp/tracks?user_id=adam')
-    details = json.loads(rest_value.data)
-    #print(details)
-    assert 'files' in details
-
-def test_tracks_02(client):
-    """
-    Test that when specifying one of the known test users then there are a list
-    of returned files
-    """
-    rest_value = client.get('/mug/api/dmp/tracks?user_id=adam')
-    details = json.loads(rest_value.data)
-    #print(details)
-    assert len(details['files']) is not 0
-
 def test_trackhistory(client):
     """
     Test that the tracks endpoint is returning the usage paramerts

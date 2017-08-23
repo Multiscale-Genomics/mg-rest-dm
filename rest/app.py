@@ -15,7 +15,7 @@
    limitations under the License.
 """
 
-from __future__ import print_function, unicode_literals
+from __future__ import print_function
 
 import json
 import os
@@ -505,7 +505,7 @@ class TrackHistory(Resource):
                                   'file_id' : file_id
                               })
 
-        files = dmp_api.get_file_history(file_id)
+        files = dmp_api.get_file_history(user_id, file_id)
 
         return {
             '_links': {
