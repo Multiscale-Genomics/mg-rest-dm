@@ -86,7 +86,7 @@ def help_usage(error_message, status_code,
     if parameters_provided:
         message['provided_parameters'] = parameters_provided
 
-    if error_message != None:
+    if error_message is not None:
         message['error'] = error_message
 
     return message
