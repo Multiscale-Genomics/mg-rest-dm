@@ -17,8 +17,7 @@
 
 __rest_name__ = "DMP"
 __description__ = """
-Main process for providing access to the DMP and checking REST APIs are
-available
+Main process for providing access to the DMP
 """
 __version__ = "v0.0"
 __author__ = "Mark McDowall"

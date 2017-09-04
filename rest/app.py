@@ -28,6 +28,8 @@ from dmp import dmp
 from reader.bigbed import bigbed_reader
 from reader.bigwig import bigwig_reader
 
+from rest.mg_auth import authorized
+
 APP = Flask(__name__)
 logging.basicConfig()
 
@@ -130,7 +132,8 @@ class Track(Resource):
     region in the relevant format.
     """
 
-    def get(self):
+    @authorized
+    def get(self, user_id):
         """
         GET  List values from the file
 
@@ -165,14 +168,6 @@ class Track(Resource):
            curl -X GET http://localhost:5002/mug/api/dmp/track?user_id=test&file_id=test_file&chrom=1&start=1000&end=2000
 
         """
-        cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-        if os.path.isfile(cnf_loc) is True:
-            dmp_api = dmp(cnf_loc)
-        else:
-            dmp_api = dmp(cnf_loc, test=True)
-
-        # TODO Placeholder code
-        user_id = request.args.get('user_id')
         file_id = request.args.get('file_id')
         chrom = request.args.get('chrom')
         start = request.args.get('start')
@@ -189,23 +184,33 @@ class Track(Resource):
         if sum([x is not None for x in params]) != len(params):
             return help_usage('MissingParameters', 400, params_requried, {'user_id' : user_id})
 
-        file_obj = dmp_api.get_file_by_id(user_id, file_id)
+        if user_id is not None:
+            cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+            if os.path.isfile(cnf_loc) is True:
+                dmp_api = dmp(cnf_loc)
+            else:
+                dmp_api = dmp(cnf_loc, test=True)
 
-        output_str = ''
-        if file_obj['file_type'] in ['bed', 'bb']:
-            bbr = bigbed_reader(file_obj['file_path'])
-            output_str = bbr.get_range(chrom, start, end, 'bed')
-        elif file_obj['file_type'] in ['wig', 'bw']:
-            print(chrom, start, end, 'wig')
-            bwr = bigwig_reader(file_obj['file_path'])
-            output_str = bwr.get_range(chrom, start, end, 'wig')
+            file_obj = dmp_api.get_file_by_id(user_id, file_id)
 
-        resp = make_response(output_str, 'application/tsv')
-        resp.headers["Content-Type"] = "text"
+            output_str = ''
+            if file_obj['file_type'] in ['bed', 'bb']:
+                bbr = bigbed_reader(file_obj['file_path'])
+                output_str = bbr.get_range(chrom, start, end, 'bed')
+            elif file_obj['file_type'] in ['wig', 'bw']:
+                print(chrom, start, end, 'wig')
+                bwr = bigwig_reader(file_obj['file_path'])
+                output_str = bwr.get_range(chrom, start, end, 'wig')
 
-        return resp
+            resp = make_response(output_str, 'application/tsv')
+            resp.headers["Content-Type"] = "text"
 
-    def post(self):
+            return resp
+
+        return help_usage('Forbidden', 403, params_requried, {})
+
+    @authorized
+    def post(self, user_id):
         """
         POST Add a new file to the DM API
 
@@ -255,46 +260,50 @@ class Track(Resource):
            curl -X POST -H "Content-Type: application/json" -d '{"user_id": "test_user", "data_type": "RNA-seq", "file_type": "fastq", "source_id": [], "meta_data": {"assembly" : "GCA_nnnnnnnn.nn"}, "taxon_id": 9606, "file_path": "/tmp/test/path/RNA-seq/testing_123.fastq"}' http://localhost:5002/mug/api/dmp/track
 
         """
-        cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-        if os.path.isfile(cnf_loc) is True:
-            dmp_api = dmp(cnf_loc)
-        else:
-            dmp_api = dmp(cnf_loc, test=True)
+        if user_id is not None:
+            cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+            if os.path.isfile(cnf_loc) is True:
+                dmp_api = dmp(cnf_loc)
+            else:
+                dmp_api = dmp(cnf_loc, test=True)
 
-        new_track = json.loads(request.data)
-        user_id = new_track['user_id'] if 'user_id' in new_track else None
-        file_path = new_track['file_path'] if 'file_path' in new_track else None
-        file_type = new_track['file_type'] if 'file_type' in new_track else None
-        data_type = new_track['data_type'] if 'data_type' in new_track else None
-        taxon_id = new_track['taxon_id'] if 'taxon_id' in new_track else None
-        source_id = new_track['source_id'] if 'source_id' in new_track else None
-        meta_data = new_track['meta_data'] if 'meta_data' in new_track else None
-        compressed = new_track['compressed'] if 'compressed' in new_track else None
+            new_track = json.loads(request.data)
+            user_id = new_track['user_id'] if 'user_id' in new_track else None
+            file_path = new_track['file_path'] if 'file_path' in new_track else None
+            file_type = new_track['file_type'] if 'file_type' in new_track else None
+            data_type = new_track['data_type'] if 'data_type' in new_track else None
+            taxon_id = new_track['taxon_id'] if 'taxon_id' in new_track else None
+            source_id = new_track['source_id'] if 'source_id' in new_track else None
+            meta_data = new_track['meta_data'] if 'meta_data' in new_track else None
+            compressed = new_track['compressed'] if 'compressed' in new_track else None
 
-        params_required = ['user_id', 'file_path', 'file_type', 'data_type',
-                           'taxon_id', 'source_id', 'meta_data']
-        params = [user_id, file_path, file_type, data_type, taxon_id,
-                  source_id, meta_data]
+            params_required = ['user_id', 'file_path', 'file_type', 'data_type',
+                               'taxon_id', 'source_id', 'meta_data']
+            params = [user_id, file_path, file_type, data_type, taxon_id,
+                      source_id, meta_data]
 
-        # ERROR - one of the required parameters is NoneType
-        if sum([x is not None for x in params]) != len(params):
-            return help_usage('MissingParameters', 400, params_required,
-                              {'user_id' : user_id})
+            # ERROR - one of the required parameters is NoneType
+            if sum([x is not None for x in params]) != len(params):
+                return help_usage('MissingParameters', 400, params_required,
+                                  {'user_id' : user_id})
 
-        new_track = json.loads(request.data)
+            new_track = json.loads(request.data)
 
-        return dmp_api.set_file(
-            user_id,
-            file_path,
-            file_type,
-            data_type,
-            taxon_id,
-            compressed,
-            source_id,
-            meta_data
-        )
+            return dmp_api.set_file(
+                user_id,
+                file_path,
+                file_type,
+                data_type,
+                taxon_id,
+                compressed,
+                source_id,
+                meta_data
+            )
 
-    def put(self):
+        return help_usage('Forbidden', 403, [], {})
+
+    @authorized
+    def put(self, user_id):
         """
         PUT Update meta data
 
@@ -340,31 +349,34 @@ class Track(Resource):
            curl -X PUT -H "Content-Type: application/json" -d '{"type":"remove_meta", "file_id":"<file_id>", "user_id":"test_user", "meta_data":["citation"]}' http://localhost:5002/mug/api/dmp/track
 
         """
-        cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-        if os.path.isfile(cnf_loc) is True:
-            dmp_api = dmp(cnf_loc)
-        else:
-            dmp_api = dmp(cnf_loc, test=True)
+        if user_id is not None:
+            cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+            if os.path.isfile(cnf_loc) is True:
+                dmp_api = dmp(cnf_loc)
+            else:
+                dmp_api = dmp(cnf_loc, test=True)
 
-        data_put = json.loads(request.data)
-        #user_id = data_put['user_id']
-        file_id = data_put['file_id']
+            data_put = json.loads(request.data)
+            file_id = data_put['file_id']
 
-        params_required = ['user_id', 'file_id', 'type']
+            params_required = ['user_id', 'file_id', 'type']
 
-        if data_put['type'] == 'add_meta':
-            for k in data_put['meta_data']:
-                result = dmp_api.add_file_metadata(
-                    file_id, k, data_put['meta_data'][k])
-        elif data_put['type'] == 'remove_meta':
-            for k in data_put['meta_data']:
-                result = dmp_api.remove_file_metadata(file_id, k)
-        else:
-            return help_usage('MissingMetaDataParameters', 400, params_required,
-                              {'type' : ['add_meta', 'remove_meta']})
-        return result
+            if data_put['type'] == 'add_meta':
+                for k in data_put['meta_data']:
+                    result = dmp_api.add_file_metadata(
+                        file_id, k, data_put['meta_data'][k])
+            elif data_put['type'] == 'remove_meta':
+                for k in data_put['meta_data']:
+                    result = dmp_api.remove_file_metadata(file_id, k)
+            else:
+                return help_usage('MissingMetaDataParameters', 400, params_required,
+                                  {'type' : ['add_meta', 'remove_meta']})
+            return result
 
-    def delete(self):
+        return help_usage('Forbidden', 403, [], {})
+
+    @authorized
+    def delete(self, user_id):
         """
         DELETE Remove a file from the DM API
 
@@ -389,20 +401,23 @@ class Track(Resource):
            curl -X DELETE -H "Content-Type: application/json" -d '{"file_id":"<file_id>", "user_id":"test_user"}' http://localhost:5002/mug/api/dmp/track
 
         """
-        cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-        if os.path.isfile(cnf_loc) is True:
-            dmp_api = dmp(cnf_loc)
-        else:
-            dmp_api = dmp(cnf_loc, test=True)
+        if user_id is not None:
+            cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+            if os.path.isfile(cnf_loc) is True:
+                dmp_api = dmp(cnf_loc)
+            else:
+                dmp_api = dmp(cnf_loc, test=True)
 
-        params_required = ['user_id', 'file_id']
-        data_delete = json.loads(request.data)
-        if data_delete['file_id']:
-            file_id = dmp_api.remove_file(data_delete['file_id'])
-        else:
-            return help_usage('MissingMetaDataParameters', 400, params_required,
-                              {})
-        return file_id
+            params_required = ['user_id', 'file_id']
+            data_delete = json.loads(request.data)
+            if data_delete['file_id']:
+                file_id = dmp_api.remove_file(data_delete['file_id'])
+            else:
+                return help_usage('MissingMetaDataParameters', 400, params_required,
+                                  {})
+            return file_id
+
+        return help_usage('Forbidden', 403, [], {})
 
 class Tracks(Resource):
     """
@@ -410,7 +425,8 @@ class Tracks(Resource):
     given user handle
     """
 
-    def get(self):
+    @authorized
+    def get(self, user_id):
         """
         GET List user tracks
 
@@ -429,39 +445,39 @@ class Tracks(Resource):
            curl -X GET http://localhost:5002/mug/api/dmp/getTracks?user_id=<user_id>
 
         """
-        # TODO Placeholder code
-        user_id = request.args.get('user_id')
+        if user_id is not None:
+            cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
 
-        cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+            print("USER ID:", user_id)
+            if os.path.isfile(cnf_loc) is True:
+                print("LIVE DM API")
+                dmp_api = dmp(cnf_loc)
+            else:
+                print("TEST DM API")
+                dmp_api = dmp(cnf_loc, test=True)
 
-        print("USER ID:", user_id)
-        if os.path.isfile(cnf_loc) is True:
-            print("LIVE DM API")
-            dmp_api = dmp(cnf_loc)
-        else:
-            print("TEST DM API")
-            dmp_api = dmp(cnf_loc, test=True)
+            params_required = ['user_id']
+            params = [user_id]
 
-        params_required = ['user_id']
-        params = [user_id]
+            # Display the parameters available
+            if sum([x is None for x in params]) == len(params):
+                return help_usage(None, 200, params_required, {})
 
-        # Display the parameters available
-        if sum([x is None for x in params]) == len(params):
-            return help_usage(None, 200, params_required, {})
+            # ERROR - one of the required parameters is NoneType
+            if sum([x is not None for x in params]) != len(params):
+                return help_usage('MissingParameters', 400, params_required, {'user_id' : user_id})
 
-        # ERROR - one of the required parameters is NoneType
-        if sum([x is not None for x in params]) != len(params):
-            return help_usage('MissingParameters', 400, params_required, {'user_id' : user_id})
+            files = dmp_api.get_files_by_user(user_id, rest=True)
 
-        files = dmp_api.get_files_by_user(user_id, rest=True)
+            return {
+                '_links': {
+                    '_self': request.base_url,
+                    '_parent' : request.url_root + 'mug/api/dmp'
+                },
+                'files': files
+            }
 
-        return {
-            '_links': {
-                '_self': request.base_url,
-                '_parent' : request.url_root + 'mug/api/dmp'
-            },
-            'files': files
-        }
+        return help_usage('Forbidden', 403, [], {})
 
 
 class TrackHistory(Resource):
@@ -470,7 +486,8 @@ class TrackHistory(Resource):
     a given file for a given user handle
     """
 
-    def get(self):
+    @authorized
+    def get(self, user_id):
         """
         GET the list of files that were used for generating the defined file
 
@@ -481,39 +498,40 @@ class TrackHistory(Resource):
 
            curl -X GET http://localhost:5002/mug/api/dmp/trackHistory?user_id=<user_id>&file_id=<file_id>
         """
-        cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-        if os.path.isfile(cnf_loc) is True:
-            dmp_api = dmp(cnf_loc)
-        else:
-            dmp_api = dmp(cnf_loc, test=True)
+        if user_id is not None:
+            cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+            if os.path.isfile(cnf_loc) is True:
+                dmp_api = dmp(cnf_loc)
+            else:
+                dmp_api = dmp(cnf_loc, test=True)
 
-        # TODO Placeholder code
-        user_id = request.args.get('user_id')
-        file_id = request.args.get('file_id')
+            file_id = request.args.get('file_id')
 
-        params = [user_id, file_id]
+            params = [user_id, file_id]
 
-        # Display the parameters available
-        if sum([x is None for x in params]) == len(params):
-            return help_usage(None, 200, [], {})
+            # Display the parameters available
+            if sum([x is None for x in params]) == len(params):
+                return help_usage(None, 200, [], {})
 
-        # ERROR - one of the required parameters is NoneType
-        if sum([x is not None for x in params]) != len(params):
-            return help_usage('MissingParameters', 400, [],
-                              {
-                                  'user_id' : user_id,
-                                  'file_id' : file_id
-                              })
+            # ERROR - one of the required parameters is NoneType
+            if sum([x is not None for x in params]) != len(params):
+                return help_usage('MissingParameters', 400, [],
+                                  {
+                                      'user_id' : user_id,
+                                      'file_id' : file_id
+                                  })
 
-        files = dmp_api.get_file_history(user_id, file_id)
+            files = dmp_api.get_file_history(user_id, file_id)
 
-        return {
-            '_links': {
-                '_self': request.base_url,
-                '_parent' : request.url_root + 'mug/api/dmp'
-            },
-            'history_files': files
-        }
+            return {
+                '_links': {
+                    '_self': request.base_url,
+                    '_parent' : request.url_root + 'mug/api/dmp'
+                },
+                'history_files': files
+            }
+
+        return help_usage('Forbidden', 403, [], {})
 
 class Ping(Resource):
     """
