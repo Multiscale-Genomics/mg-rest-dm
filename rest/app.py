@@ -19,19 +19,21 @@ from __future__ import print_function
 
 import json
 import os
-import logging
+#import logging
 
-from flask import Flask, request, make_response
+from flask import Flask, Response, request, make_response
 from flask_restful import Api, Resource
 
 from dmp import dmp
 from reader.bigbed import bigbed_reader
 from reader.bigwig import bigwig_reader
+#from reader.tabix import tabix_reader
+from reader.hdf5_reader import hdf5_reader
 
 from rest.mg_auth import authorized
 
 APP = Flask(__name__)
-logging.basicConfig()
+#logging.basicConfig()
 
 def help_usage(error_message, status_code,
                parameters_required, parameters_provided):
@@ -116,20 +118,21 @@ class EndPoints(Resource):
         return {
             '_links': {
                 '_self': request.base_url,
-                '_getTrack': request.url_root + 'mug/api/dmp/track',
-                '_getTracks': request.url_root + 'mug/api/dmp/tracks',
-                '_getTrackHistory': request.url_root + 'mug/api/dmp/trackHistory',
+                '_getFile': request.url_root + 'mug/api/dmp/file',
+                '_getFiles': request.url_root + 'mug/api/dmp/files',
+                '_getFileHistory': request.url_root + 'mug/api/dmp/fileHistory',
                 '_ping': request.url_root + 'mug/api/dmp/ping',
                 '_parent': request.url_root + 'mug/api'
             }
         }
 
 
-class Track(Resource):
+class File(Resource):
     """
-    Class to handle the http requests for retrieving the data from a track file.
+    Class to handle the http requests for retrieving the data from a file.
     This class is able to handle big[Bed|Wig] file and serve back the matching
-    region in the relevant format.
+    region in the relevant format. It is also possible to stream back the whole
+    file of any type for use in other tools.
     """
 
     @authorized
@@ -138,7 +141,9 @@ class Track(Resource):
         GET  List values from the file
 
         Call to optain regions from the conpressed index files for Bed, Wig and
-        TSV based file formats that contain genomic information
+        TSV based file formats that contain genomic information.
+
+        Other files can be streamed.
 
         Parameters
         ----------
@@ -153,6 +158,8 @@ class Track(Resource):
             Start position for a selected region
         end : int
             End position for a selected region
+        output : str
+            Default is None. State 'original' to return the original whole file
 
         Returns
         -------
@@ -172,8 +179,9 @@ class Track(Resource):
         chrom = request.args.get('chrom')
         start = request.args.get('start')
         end = request.args.get('end')
+        output = request.args.get('output')
 
-        params_requried = ['user_id', 'file_id', 'chrom', 'start', 'end']
+        params_requried = ['user_id', 'file_id']
         params = [user_id, file_id, chrom, start, end]
 
         # Display the parameters available
@@ -182,7 +190,7 @@ class Track(Resource):
 
         # ERROR - one of the required parameters is NoneType
         if sum([x is not None for x in params]) != len(params):
-            return help_usage('MissingParameters', 400, params_requried, {'user_id' : user_id})
+            return help_usage('MissingParameters', 400, params_requried, user_id)
 
         if user_id is not None:
             cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
@@ -191,21 +199,35 @@ class Track(Resource):
             else:
                 dmp_api = dmp(cnf_loc, test=True)
 
-            file_obj = dmp_api.get_file_by_id(user_id, file_id)
+            file_obj = dmp_api.get_file_by_id(user_id['user_id'], file_id)
 
-            output_str = ''
-            if file_obj['file_type'] in ['bed', 'bb']:
-                bbr = bigbed_reader(file_obj['file_path'])
-                output_str = bbr.get_range(chrom, start, end, 'bed')
-            elif file_obj['file_type'] in ['wig', 'bw']:
-                print(chrom, start, end, 'wig')
-                bwr = bigwig_reader(file_obj['file_path'])
-                output_str = bwr.get_range(chrom, start, end, 'wig')
+            if output is not None and output == 'original':
+                def output_generate():
+                    """
+                    Function to iterate through a file and stream it back to the user
+                    """
+                    with open(file_obj['file_path'], 'rb') as f_strm:
+                        #for chunk in iter(lambda: f_strm.read(4096), b''):
+                        for chunk in iter(lambda: f_strm.read(64), b''):
+                            yield chunk
+                return Response(output_generate(), mimetype='text/text')
+            else:
+                output_str = ''
+                if file_obj['file_type'] in ['bed', 'bb']:
+                    bbr = bigbed_reader(file_obj['file_path'])
+                    output_str = bbr.get_range(chrom, start, end, 'bed')
+                elif file_obj['file_type'] in ['wig', 'bw']:
+                    print(chrom, start, end, 'wig')
+                    bwr = bigwig_reader(file_obj['file_path'])
+                    output_str = bwr.get_range(chrom, start, end, 'wig')
+                # elif file_obj['file_type'] in ['gff3', 'tsv', 'tbi']:
+                #     txr = tabix_reader(file_obj['file_path'])
+                #     output_str = txr.get_range(chrom, start, end, 'gff3')
 
-            resp = make_response(output_str, 'application/tsv')
-            resp.headers["Content-Type"] = "text"
+                resp = make_response(output_str, 'application/tsv')
+                resp.headers["Content-Type"] = "text"
 
-            return resp
+                return resp
 
         return help_usage('Forbidden', 403, params_requried, {})
 
@@ -213,9 +235,6 @@ class Track(Resource):
     def post(self, user_id):
         """
         POST Add a new file to the DM API
-
-        Call to optain regions from the conpressed index files for Bed, Wig and
-        TSV based file formats that contain genomic information
 
         Parameters
         ----------
@@ -261,6 +280,7 @@ class Track(Resource):
 
         """
         if user_id is not None:
+            print("USER_ID:", user_id['user_id'])
             cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
             if os.path.isfile(cnf_loc) is True:
                 dmp_api = dmp(cnf_loc)
@@ -268,7 +288,7 @@ class Track(Resource):
                 dmp_api = dmp(cnf_loc, test=True)
 
             new_track = json.loads(request.data)
-            user_id = new_track['user_id'] if 'user_id' in new_track else None
+            #user_id = new_track['user_id'] if 'user_id' in new_track else None
             file_path = new_track['file_path'] if 'file_path' in new_track else None
             file_type = new_track['file_type'] if 'file_type' in new_track else None
             data_type = new_track['data_type'] if 'data_type' in new_track else None
@@ -285,12 +305,12 @@ class Track(Resource):
             # ERROR - one of the required parameters is NoneType
             if sum([x is not None for x in params]) != len(params):
                 return help_usage('MissingParameters', 400, params_required,
-                                  {'user_id' : user_id})
+                                  user_id)
 
             new_track = json.loads(request.data)
 
             return dmp_api.set_file(
-                user_id,
+                user_id['user_id'],
                 file_path,
                 file_type,
                 data_type,
@@ -364,10 +384,10 @@ class Track(Resource):
             if data_put['type'] == 'add_meta':
                 for k in data_put['meta_data']:
                     result = dmp_api.add_file_metadata(
-                        file_id, k, data_put['meta_data'][k])
+                        user_id['user_id'], file_id, k, data_put['meta_data'][k])
             elif data_put['type'] == 'remove_meta':
                 for k in data_put['meta_data']:
-                    result = dmp_api.remove_file_metadata(file_id, k)
+                    result = dmp_api.remove_file_metadata(user_id['user_id'], file_id, k)
             else:
                 return help_usage('MissingMetaDataParameters', 400, params_required,
                                   {'type' : ['add_meta', 'remove_meta']})
@@ -411,7 +431,7 @@ class Track(Resource):
             params_required = ['user_id', 'file_id']
             data_delete = json.loads(request.data)
             if data_delete['file_id']:
-                file_id = dmp_api.remove_file(data_delete['file_id'])
+                file_id = dmp_api.remove_file(user_id['user_id'], data_delete['file_id'])
             else:
                 return help_usage('MissingMetaDataParameters', 400, params_required,
                                   {})
@@ -419,7 +439,7 @@ class Track(Resource):
 
         return help_usage('Forbidden', 403, [], {})
 
-class Tracks(Resource):
+class Files(Resource):
     """
     Class to handle the http requests for retrieving the list of files for a
     given user handle
@@ -430,21 +450,50 @@ class Tracks(Resource):
         """
         GET List user tracks
 
-        Function to list the tracks that are owned by a single user.
+        Function to list the filess that are owned by a single user. It is
+        possible to filter by assembly, file or data type, or to find track
+        files that contain data for a given region
 
         Parameters
         ----------
-
-
+        assembly : str
+            Genome assembly accession
+        region : str
+            <chromosome>:start_pos:end_pos
+        file_type : str
+        data_type : str
 
         Example
         -------
         .. code-block:: none
            :linenos:
 
-           curl -X GET http://localhost:5002/mug/api/dmp/getTracks?user_id=<user_id>
+           curl -X GET http://localhost:5002/mug/api/dmp/Files?>
 
         """
+        region = request.args.get('region')
+        assembly = request.args.get('assembly')
+        file_type = request.args.get('file_type')
+        data_type = request.args.get('data_type')
+
+        params_required = ['region', 'assembly']
+        params = [region, assembly]
+
+        get_files_by_assembly = False
+        get_files_by_range = False
+        get_files_by_file_type = False
+        get_files_by_data_type = False
+
+        # Display the parameters available
+        if region is not None and assembly is not None:
+            get_files_by_range = True
+        elif file_type is not None and assembly is not None:
+            get_files_by_file_type = True
+        elif data_type is not None and assembly is not None:
+            get_files_by_data_type = True
+        elif assembly is not None:
+            get_files_by_assembly = True
+
         if user_id is not None:
             cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
 
@@ -465,9 +514,31 @@ class Tracks(Resource):
 
             # ERROR - one of the required parameters is NoneType
             if sum([x is not None for x in params]) != len(params):
-                return help_usage('MissingParameters', 400, params_required, {'user_id' : user_id})
+                return help_usage('MissingParameters', 400, params_required, user_id)
 
-            files = dmp_api.get_files_by_user(user_id, rest=True)
+            if (
+                    get_files_by_range or get_files_by_assembly or
+                    get_files_by_file_type or get_files_by_data_type
+                ):
+                h5_idx = hdf5_reader(user_id['user_id'])
+                files = []
+                if get_files_by_range:
+                    chrom, start, end = region.split(':')
+                    potential_files = h5_idx.get_regions(assembly, chrom, int(start), int(end))
+                    for f_in in potential_files[1]:
+                        files.append(dmp_api.get_file_by_id(f_in))
+                    for f_in in potential_files[1000]:
+                        files.append(dmp_api.get_file_by_id(f_in))
+                elif get_files_by_file_type:
+                    files = dmp_api.get_files_by_file_type(user_id['user_id'], rest=True)
+                elif get_files_by_file_type:
+                    files = dmp_api.get_files_by_data_type(user_id['user_id'], rest=True)
+                elif get_files_by_assembly:
+                    potential_files = h5_idx.get_files(assembly)
+                    for f_in in potential_files:
+                        files.append(dmp_api.get_file_by_id(f_in))
+            else:
+                files = dmp_api.get_files_by_user(user_id['user_id'], rest=True)
 
             return {
                 '_links': {
@@ -480,7 +551,7 @@ class Tracks(Resource):
         return help_usage('Forbidden', 403, [], {})
 
 
-class TrackHistory(Resource):
+class FileHistory(Resource):
     """
     Class to handle the http requests for retrieving the list of file history of
     a given file for a given user handle
@@ -517,11 +588,11 @@ class TrackHistory(Resource):
             if sum([x is not None for x in params]) != len(params):
                 return help_usage('MissingParameters', 400, [],
                                   {
-                                      'user_id' : user_id,
+                                      'user_id' : user_id['user_id'],
                                       'file_id' : file_id
                                   })
 
-            files = dmp_api.get_file_history(user_id, file_id)
+            files = dmp_api.get_file_history(user_id['user_id'], file_id)
 
             return {
                 '_links': {
@@ -568,7 +639,7 @@ class Ping(Resource):
         }
         return res
 
-# TODO
+#
 # For the services where there needs to be an extra layer (adjacency lists),
 # then there needs to be a way of forwarding for this. But the majority of
 # things can be redirected to the raw files for use as a track.
@@ -582,13 +653,13 @@ REST_API = Api(APP)
 REST_API.add_resource(EndPoints, "/mug/api/dmp", endpoint='dmp_root')
 
 #   Get the data for a specific track
-REST_API.add_resource(Track, "/mug/api/dmp/track", endpoint='track')
+REST_API.add_resource(File, "/mug/api/dmp/file", endpoint='file')
 
 #   List the available species for which there are datasets available
-REST_API.add_resource(Tracks, "/mug/api/dmp/tracks", endpoint='tracks')
+REST_API.add_resource(Files, "/mug/api/dmp/files", endpoint='files')
 
 #   List file history
-REST_API.add_resource(TrackHistory, "/mug/api/dmp/trackHistory", endpoint='trackHistory')
+REST_API.add_resource(FileHistory, "/mug/api/dmp/fileHistory", endpoint='fileHistory')
 
 #   Service ping
 REST_API.add_resource(Ping, "/mug/api/dmp/ping", endpoint='dmp-ping')

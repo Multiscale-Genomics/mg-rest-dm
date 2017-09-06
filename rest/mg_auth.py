@@ -30,6 +30,11 @@ def validate_token(access_token):
     with open(os.path.dirname(os.path.abspath(__file__)) + '/auth_meta.json') as data_file:
         data = json.load(data_file)
 
+    if data['auth_server']['test'] == 1:
+        return {
+            'user_id': 'test'
+        }
+
     http_handler = Http()
     resp, user_data = http_handler.request(
         data['auth_server']['url'],

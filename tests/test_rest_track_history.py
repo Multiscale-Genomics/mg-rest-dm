@@ -46,19 +46,16 @@ def client(request):
 
 def test_track_history_01(client):
     """
-    Test that specifying a user_id returns information
+    Due to authentication this users the test user
     """
-    users = ["adam", "ben", "chris", "denis", "eric", "test"]
+    rest_value = client.get('/mug/api/dmp/files')
+    results = json.loads(rest_value.data)
+    #_run_tests(results)
 
-    for user in users:
-        rest_value = client.get('/mug/api/dmp/tracks?user_id=' + user)
-        results = json.loads(rest_value.data)
-        #_run_tests(results)
+    for result in results['files']:
+        print(result['_id'])
+        rest_value = client.get('/mug/api/dmp/fileHistory?file_id=' + result['_id'])
+        history_results = json.loads(rest_value.data)
+        print(history_results)
 
-        for result in results['files']:
-            print(result['_id'])
-            rest_value = client.get('/mug/api/dmp/trackHistory?user_id=' + user + '&file_id=' + result['_id'])
-            history_results = json.loads(rest_value.data)
-            print(history_results)
-
-            assert 'history_files' in history_results
+        assert 'history_files' in history_results
