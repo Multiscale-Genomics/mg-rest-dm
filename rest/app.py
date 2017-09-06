@@ -65,12 +65,15 @@ def help_usage(error_message, status_code,
         JSON formated status message to display to the user
     """
     parameters = {
-        'user_id' : ['User ID', 'str', 'REQUIRED'],
         'file_id' : ['File ID', 'str', 'REQUIRED'],
-        'chrom' : ['Chromosome', 'str', 'REQUIRED'],
-        'start' : ['Start', 'int', 'REQUIRED'],
-        'end' : ['End', 'int', 'REQUIRED'],
-        'type' : ['add_meta|remove_meta', 'str', 'REQUIRED']
+        'region' : ['Chromosome:Start:End', 'str:int:int', 'OPTIONAL']
+        'file_type' : ['', 'str', 'OPTION'],
+        'data_type' : ['', 'str', 'OPTION'],
+        'assembly' : ['Assembly', 'str', 'REQUIRED'],
+        'chrom' : ['Chromosome', 'str', 'OPTION'],
+        'start' : ['Start', 'int', 'OPTION'],
+        'end' : ['End', 'int', 'OPTION'],
+        'type' : ['add_meta|remove_meta', 'str', 'OPTION']
     }
 
     used_param = {k : parameters[k] for k in parameters_required if k in parameters}
@@ -186,11 +189,11 @@ class File(Resource):
 
         # Display the parameters available
         if sum([x is None for x in params]) == len(params):
-            return help_usage(None, 200, params_requried, {})
+            return help_usage(None, 200, ['file_id'], {})
 
         # ERROR - one of the required parameters is NoneType
         if sum([x is not None for x in params]) != len(params):
-            return help_usage('MissingParameters', 400, params_requried, user_id)
+            return help_usage('MissingParameters', 400, ['file_id'], user_id)
 
         if user_id is not None:
             cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
@@ -471,30 +474,15 @@ class Files(Resource):
            curl -X GET http://localhost:5002/mug/api/dmp/Files?>
 
         """
-        region = request.args.get('region')
-        assembly = request.args.get('assembly')
-        file_type = request.args.get('file_type')
-        data_type = request.args.get('data_type')
-
-        params_required = ['region', 'assembly']
-        params = [region, assembly]
-
-        get_files_by_assembly = False
-        get_files_by_range = False
-        get_files_by_file_type = False
-        get_files_by_data_type = False
-
-        # Display the parameters available
-        if region is not None and assembly is not None:
-            get_files_by_range = True
-        elif file_type is not None and assembly is not None:
-            get_files_by_file_type = True
-        elif data_type is not None and assembly is not None:
-            get_files_by_data_type = True
-        elif assembly is not None:
-            get_files_by_assembly = True
-
         if user_id is not None:
+            region = request.args.get('region')
+            assembly = request.args.get('assembly')
+            file_type = request.args.get('file_type')
+            data_type = request.args.get('data_type')
+
+            params_required = ['region', 'assembly']
+            params = [region, assembly]
+
             cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
 
             print("USER ID:", user_id)
@@ -510,33 +498,25 @@ class Files(Resource):
 
             # Display the parameters available
             if sum([x is None for x in params]) == len(params):
-                return help_usage(None, 200, params_required, {})
+                return help_usage(None, 200, [], {})
 
-            # ERROR - one of the required parameters is NoneType
-            if sum([x is not None for x in params]) != len(params):
-                return help_usage('MissingParameters', 400, params_required, user_id)
-
-            if (
-                    get_files_by_range or get_files_by_assembly or
-                    get_files_by_file_type or get_files_by_data_type
-                ):
-                h5_idx = hdf5_reader(user_id['user_id'])
-                files = []
-                if get_files_by_range:
-                    chrom, start, end = region.split(':')
-                    potential_files = h5_idx.get_regions(assembly, chrom, int(start), int(end))
-                    for f_in in potential_files[1]:
-                        files.append(dmp_api.get_file_by_id(f_in))
-                    for f_in in potential_files[1000]:
-                        files.append(dmp_api.get_file_by_id(f_in))
-                elif get_files_by_file_type:
-                    files = dmp_api.get_files_by_file_type(user_id['user_id'], rest=True)
-                elif get_files_by_file_type:
-                    files = dmp_api.get_files_by_data_type(user_id['user_id'], rest=True)
-                elif get_files_by_assembly:
-                    potential_files = h5_idx.get_files(assembly)
-                    for f_in in potential_files:
-                        files.append(dmp_api.get_file_by_id(f_in))
+            files = []
+            h5_idx = hdf5_reader(user_id['user_id'])
+            if region is not None and assembly is not None:
+                chrom, start, end = region.split(':')
+                potential_files = h5_idx.get_regions(assembly, chrom, int(start), int(end))
+                for f_in in potential_files[1]:
+                    files.append(dmp_api.get_file_by_id(f_in))
+                for f_in in potential_files[1000]:
+                    files.append(dmp_api.get_file_by_id(f_in))
+            elif file_type is not None and assembly is not None:
+                files = dmp_api.get_files_by_file_type(user_id['user_id'], rest=True)
+            elif data_type is not None and assembly is not None:
+                files = dmp_api.get_files_by_data_type(user_id['user_id'], rest=True)
+            elif assembly is not None:
+                potential_files = h5_idx.get_files(assembly)
+                for f_in in potential_files:
+                    files.append(dmp_api.get_file_by_id(f_in))
             else:
                 files = dmp_api.get_files_by_user(user_id['user_id'], rest=True)
 
