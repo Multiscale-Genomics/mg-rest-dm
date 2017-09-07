@@ -98,6 +98,15 @@ def help_usage(error_message, status_code,
 
     return message
 
+def _get_dm_api():
+    cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+    if os.path.isfile(cnf_loc) is True:
+        print("LIVE DM API")
+        return dmp(cnf_loc)
+
+    print("TEST DM API")
+    return dmp(cnf_loc, test=True)
+
 class EndPoints(Resource):
     """
     Class to handle the http requests for returning information about the end
@@ -154,13 +163,8 @@ class File(Resource):
             User ID
         file_id : str
             Identifier of the file to retrieve data from
-        chrom : str
-            Chromosome identifier (1, 2, 3, chr1, chr2, chr3, I, II, III, etc)
-            for the chromosome of interest
-        start : int
-            Start position for a selected region
-        end : int
-            End position for a selected region
+        region : str
+            <chromosome>:<start_pos>:<end_pos>
         output : str
             Default is None. State 'original' to return the original whole file
 
@@ -179,13 +183,11 @@ class File(Resource):
 
         """
         file_id = request.args.get('file_id')
-        chrom = request.args.get('chrom')
-        start = request.args.get('start')
-        end = request.args.get('end')
+        region = request.args.get('region')
         output = request.args.get('output')
 
         params_requried = ['user_id', 'file_id']
-        params = [user_id, file_id, chrom, start, end]
+        params = [user_id, file_id]
 
         # Display the parameters available
         if sum([x is None for x in params]) == len(params):
@@ -196,11 +198,7 @@ class File(Resource):
             return help_usage('MissingParameters', 400, ['file_id'], user_id)
 
         if user_id is not None:
-            cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-            if os.path.isfile(cnf_loc) is True:
-                dmp_api = dmp(cnf_loc)
-            else:
-                dmp_api = dmp(cnf_loc, test=True)
+            dmp_api = _get_dm_api()
 
             file_obj = dmp_api.get_file_by_id(user_id['user_id'], file_id)
 
@@ -215,6 +213,15 @@ class File(Resource):
                             yield chunk
                 return Response(output_generate(), mimetype='text/text')
             else:
+                chrom, start, end = region.split(':')
+
+                params_requried = ['file_id', 'chrom', 'start', 'end']
+                params = [file_id, chrom, start, end]
+
+                # Display the parameters available
+                if sum([x is None for x in params]) == len(params):
+                    return help_usage(None, 200, params, {})
+
                 output_str = ''
                 if file_obj['file_type'] in ['bed', 'bb']:
                     bbr = bigbed_reader(file_obj['file_path'])
@@ -284,11 +291,7 @@ class File(Resource):
         """
         if user_id is not None:
             print("USER_ID:", user_id['user_id'])
-            cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-            if os.path.isfile(cnf_loc) is True:
-                dmp_api = dmp(cnf_loc)
-            else:
-                dmp_api = dmp(cnf_loc, test=True)
+            dmp_api = _get_dm_api()
 
             new_track = json.loads(request.data)
             #user_id = new_track['user_id'] if 'user_id' in new_track else None
@@ -373,11 +376,7 @@ class File(Resource):
 
         """
         if user_id is not None:
-            cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-            if os.path.isfile(cnf_loc) is True:
-                dmp_api = dmp(cnf_loc)
-            else:
-                dmp_api = dmp(cnf_loc, test=True)
+            dmp_api = _get_dm_api()
 
             data_put = json.loads(request.data)
             file_id = data_put['file_id']
@@ -425,11 +424,7 @@ class File(Resource):
 
         """
         if user_id is not None:
-            cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-            if os.path.isfile(cnf_loc) is True:
-                dmp_api = dmp(cnf_loc)
-            else:
-                dmp_api = dmp(cnf_loc, test=True)
+            dmp_api = _get_dm_api()
 
             params_required = ['user_id', 'file_id']
             data_delete = json.loads(request.data)
@@ -462,7 +457,7 @@ class Files(Resource):
         assembly : str
             Genome assembly accession
         region : str
-            <chromosome>:start_pos:end_pos
+            <chromosome>:<start_pos>:<end_pos>
         file_type : str
         data_type : str
 
@@ -480,15 +475,10 @@ class Files(Resource):
             file_type = request.args.get('file_type')
             data_type = request.args.get('data_type')
 
-            cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+            dmp_api = _get_dm_api()
 
             print("USER ID:", user_id)
-            if os.path.isfile(cnf_loc) is True:
-                print("LIVE DM API")
-                dmp_api = dmp(cnf_loc)
-            else:
-                print("TEST DM API")
-                dmp_api = dmp(cnf_loc, test=True)
+            dmp_api = _get_dm_api()
 
             params = [user_id]
 
@@ -547,11 +537,7 @@ class FileHistory(Resource):
            curl -X GET http://localhost:5002/mug/api/dmp/trackHistory?user_id=<user_id>&file_id=<file_id>
         """
         if user_id is not None:
-            cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
-            if os.path.isfile(cnf_loc) is True:
-                dmp_api = dmp(cnf_loc)
-            else:
-                dmp_api = dmp(cnf_loc, test=True)
+            dmp_api = _get_dm_api()
 
             file_id = request.args.get('file_id')
 
