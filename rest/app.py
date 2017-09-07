@@ -480,9 +480,6 @@ class Files(Resource):
             file_type = request.args.get('file_type')
             data_type = request.args.get('data_type')
 
-            params_required = ['region', 'assembly']
-            params = [region, assembly]
-
             cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
 
             print("USER ID:", user_id)
@@ -493,7 +490,6 @@ class Files(Resource):
                 print("TEST DM API")
                 dmp_api = dmp(cnf_loc, test=True)
 
-            params_required = ['user_id']
             params = [user_id]
 
             # Display the parameters available
@@ -529,7 +525,7 @@ class Files(Resource):
                 'files': files
             }
 
-        return help_usage('Forbidden', 403, [], {})
+        return help_usage(None, 200, [], {})
 
 
 class FileHistory(Resource):
