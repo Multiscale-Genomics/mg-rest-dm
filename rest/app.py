@@ -288,7 +288,20 @@ class File(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X POST -H "Content-Type: application/json" -d '{"user_id": "test_user", "data_type": "RNA-seq", "file_type": "fastq", "source_id": [], "meta_data": {"assembly" : "GCA_nnnnnnnn.nn"}, "taxon_id": 9606, "file_path": "/tmp/test/path/RNA-seq/testing_123.fastq"}' http://localhost:5002/mug/api/dmp/track
+           echo '{
+               "data_type": "RNA-seq",
+               "file_type": "fastq",
+               "source_id": [],
+               "meta_data": {
+                   "assembly" : "GRCh38"
+               }, "taxon_id": 9606,
+               "file_path": "/tmp/test/path/RNA-seq/testing_123.fastq"
+           }' > data.json
+
+           curl -X POST
+               -H "Content-Type: application/json"   \
+               -H "Authorization: Bearer teststring" \
+               -d @data.json http://localhost:5002/mug/api/dmp/file
 
         """
         if user_id is not None:
@@ -366,14 +379,32 @@ class File(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X PUT -H "Content-Type: application/json" -d '{"type":"add_meta", "file_id":"<file_id>", "user_id":"test_user", "meta_data":{"citation":"PMID:1234567890"}}' http://localhost:5002/mug/api/dmp/track
+           echo '{
+               "type":"add_meta",
+               "file_id":"<file_id>",
+               "meta_data":{"citation":"PMID:1234567890"}
+           }' > data.json
+
+           curl -X PUT
+               -H "Content-Type: application/json"   \
+               -H "Authorization: Bearer teststring" \
+               -d @data.json http://localhost:5002/mug/api/dmp/file
 
         To remove a key value pair:
 
         .. code-block:: none
            :linenos:
 
-           curl -X PUT -H "Content-Type: application/json" -d '{"type":"remove_meta", "file_id":"<file_id>", "user_id":"test_user", "meta_data":["citation"]}' http://localhost:5002/mug/api/dmp/track
+           echo '{
+               "type":"remove_meta",
+               "file_id":"<file_id>",
+               "meta_data":["citation"]
+           }' > data.json
+
+           curl -X PUT
+               -H "Content-Type: application/json"   \
+               -H "Authorization: Bearer teststring" \
+               -d @data.json http://localhost:5002/mug/api/dmp/file
 
         """
         if user_id is not None:
@@ -421,7 +452,14 @@ class File(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X DELETE -H "Content-Type: application/json" -d '{"file_id":"<file_id>", "user_id":"test_user"}' http://localhost:5002/mug/api/dmp/track
+           echo '{
+               "file_id":"<file_id>"
+           }' > data.json
+
+           curl -X DELETE
+               -H "Content-Type: application/json"   \
+               -H "Authorization: Bearer teststring" \
+               -d @data.json http://localhost:5002/mug/api/dmp/file
 
         """
         if user_id is not None:
@@ -535,7 +573,7 @@ class FileHistory(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X GET http://localhost:5002/mug/api/dmp/trackHistory?user_id=<user_id>&file_id=<file_id>
+           curl -X GET http://localhost:5002/mug/api/dmp/trackHistory?file_id=<file_id>
         """
         if user_id is not None:
             dmp_api = _get_dm_api()
