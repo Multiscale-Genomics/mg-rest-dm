@@ -66,14 +66,14 @@ def help_usage(error_message, status_code,
     """
     parameters = {
         'file_id' : ['File ID', 'str', 'REQUIRED'],
-        'region' : ['Chromosome:Start:End', 'str:int:int', 'OPTIONAL']
-        'file_type' : ['', 'str', 'OPTION'],
-        'data_type' : ['', 'str', 'OPTION'],
+        'region' : ['Chromosome:Start:End', 'str:int:int', 'OPTIONAL'],
+        'file_type' : ['File type (bb, bw, tsv, fasta, fastq, ...)', 'str', 'OPTIONAL'],
+        'data_type' : ['Data type (chip-seq, rna-seq, wgbs, ...)', 'str', 'OPTIONAL'],
         'assembly' : ['Assembly', 'str', 'REQUIRED'],
-        'chrom' : ['Chromosome', 'str', 'OPTION'],
-        'start' : ['Start', 'int', 'OPTION'],
-        'end' : ['End', 'int', 'OPTION'],
-        'type' : ['add_meta|remove_meta', 'str', 'OPTION']
+        'chrom' : ['Chromosome', 'str', 'OPTIONAL'],
+        'start' : ['Start', 'int', 'OPTIONAL'],
+        'end' : ['End', 'int', 'OPTIONAL'],
+        'type' : ['add_meta|remove_meta', 'str', 'OPTIONAL']
     }
 
     used_param = {k : parameters[k] for k in parameters_required if k in parameters}
