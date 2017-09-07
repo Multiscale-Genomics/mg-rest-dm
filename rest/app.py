@@ -179,14 +179,13 @@ class File(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X GET http://localhost:5002/mug/api/dmp/track?user_id=test&file_id=test_file&chrom=1&start=1000&end=2000
+           curl -X GET http://localhost:5002/mug/api/dmp/track?file_id=test_file&region=1:1000:2000
 
         """
         file_id = request.args.get('file_id')
         region = request.args.get('region')
         output = request.args.get('output')
 
-        params_requried = ['user_id', 'file_id']
         params = [user_id, file_id]
 
         # Display the parameters available
@@ -203,19 +202,13 @@ class File(Resource):
             file_obj = dmp_api.get_file_by_id(user_id['user_id'], file_id)
 
             if output is not None and output == 'original':
-                def output_generate():
-                    """
-                    Function to iterate through a file and stream it back to the user
-                    """
-                    with open(file_obj['file_path'], 'rb') as f_strm:
-                        #for chunk in iter(lambda: f_strm.read(4096), b''):
-                        for chunk in iter(lambda: f_strm.read(64), b''):
-                            yield chunk
-                return Response(output_generate(), mimetype='text/text')
+                return Response(
+                    self._output_generate(file_obj['file_path']),
+                    mimetype='text/text'
+                )
             else:
                 chrom, start, end = region.split(':')
 
-                params_requried = ['file_id', 'chrom', 'start', 'end']
                 params = [file_id, chrom, start, end]
 
                 # Display the parameters available
@@ -224,22 +217,31 @@ class File(Resource):
 
                 output_str = ''
                 if file_obj['file_type'] in ['bed', 'bb']:
-                    bbr = bigbed_reader(file_obj['file_path'])
-                    output_str = bbr.get_range(chrom, start, end, 'bed')
+                    reader = bigbed_reader(file_obj['file_path'])
+                    output_str = reader.get_range(chrom, start, end, 'bed')
                 elif file_obj['file_type'] in ['wig', 'bw']:
                     print(chrom, start, end, 'wig')
-                    bwr = bigwig_reader(file_obj['file_path'])
-                    output_str = bwr.get_range(chrom, start, end, 'wig')
+                    reader = bigwig_reader(file_obj['file_path'])
+                    output_str = reader.get_range(chrom, start, end, 'wig')
                 # elif file_obj['file_type'] in ['gff3', 'tsv', 'tbi']:
-                #     txr = tabix_reader(file_obj['file_path'])
-                #     output_str = txr.get_range(chrom, start, end, 'gff3')
+                #     reader = tabix_reader(file_obj['file_path'])
+                #     output_str = reader.get_range(chrom, start, end, 'gff3')
 
                 resp = make_response(output_str, 'application/tsv')
                 resp.headers["Content-Type"] = "text"
 
                 return resp
 
-        return help_usage('Forbidden', 403, params_requried, {})
+        return help_usage('Forbidden', 403, ['file_id'], {})
+
+    def _output_generate(self, file_path):
+        """
+        Function to iterate through a file and stream it back to the user
+        """
+        with open(file_path, 'rb') as f_strm:
+            #for chunk in iter(lambda: f_strm.read(4096), b''):
+            for chunk in iter(lambda: f_strm.read(64), b''):
+                yield chunk
 
     @authorized
     def post(self, user_id):
@@ -294,7 +296,6 @@ class File(Resource):
             dmp_api = _get_dm_api()
 
             new_track = json.loads(request.data)
-            #user_id = new_track['user_id'] if 'user_id' in new_track else None
             file_path = new_track['file_path'] if 'file_path' in new_track else None
             file_type = new_track['file_type'] if 'file_type' in new_track else None
             data_type = new_track['data_type'] if 'data_type' in new_track else None
@@ -475,8 +476,6 @@ class Files(Resource):
             file_type = request.args.get('file_type')
             data_type = request.args.get('data_type')
 
-            dmp_api = _get_dm_api()
-
             print("USER ID:", user_id)
             dmp_api = _get_dm_api()
 
@@ -488,22 +487,13 @@ class Files(Resource):
 
             files = []
             if region is not None and assembly is not None:
-                chrom, start, end = region.split(':')
-                h5_idx = hdf5_reader(user_id['user_id'])
-                potential_files = h5_idx.get_regions(assembly, chrom, int(start), int(end))
-                for f_in in potential_files[1]:
-                    files.append(dmp_api.get_file_by_id(f_in))
-                for f_in in potential_files[1000]:
-                    files.append(dmp_api.get_file_by_id(f_in))
+                files = self._get_all_files_region(dmp_api, user_id['user_id'], assembly, region)
             elif file_type is not None and assembly is not None:
                 files = dmp_api.get_files_by_file_type(user_id['user_id'], rest=True)
             elif data_type is not None and assembly is not None:
                 files = dmp_api.get_files_by_data_type(user_id['user_id'], rest=True)
             elif assembly is not None:
-                h5_idx = hdf5_reader(user_id['user_id'])
-                potential_files = h5_idx.get_files(assembly)
-                for f_in in potential_files:
-                    files.append(dmp_api.get_file_by_id(f_in))
+                files = dmp_api.get_files_by_assembly(user_id['user_id'], assembly, rest=True)
             else:
                 files = dmp_api.get_files_by_user(user_id['user_id'], rest=True)
 
@@ -516,6 +506,17 @@ class Files(Resource):
             }
 
         return help_usage(None, 200, [], {})
+
+    def _get_all_files_region(self, dmp_api, user_id, assembly, region):
+        files = []
+        chrom, start, end = region.split(':')
+        h5_idx = hdf5_reader(user_id['user_id'])
+        potential_files = h5_idx.get_regions(assembly, chrom, int(start), int(end))
+        for f_in in potential_files[1]:
+            files.append(dmp_api.get_file_by_id(f_in))
+        for f_in in potential_files[1000]:
+            files.append(dmp_api.get_file_by_id(f_in))
+        return files
 
 
 class FileHistory(Resource):
