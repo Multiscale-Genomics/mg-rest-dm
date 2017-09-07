@@ -62,10 +62,6 @@ def authorized(func):
     """
 
     def _wrap(*args, **kwargs):
-        if os.environ.get('READTHEDOCS') == 'True':
-            return {
-                'user_id': 'test_rtd'
-            }
         if 'Authorization' not in request.headers:
             print('No token provided')
             abort(401)
