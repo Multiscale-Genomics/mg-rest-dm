@@ -501,9 +501,9 @@ class Files(Resource):
                 return help_usage(None, 200, [], {})
 
             files = []
-            h5_idx = hdf5_reader(user_id['user_id'])
             if region is not None and assembly is not None:
                 chrom, start, end = region.split(':')
+                h5_idx = hdf5_reader(user_id['user_id'])
                 potential_files = h5_idx.get_regions(assembly, chrom, int(start), int(end))
                 for f_in in potential_files[1]:
                     files.append(dmp_api.get_file_by_id(f_in))
@@ -514,6 +514,7 @@ class Files(Resource):
             elif data_type is not None and assembly is not None:
                 files = dmp_api.get_files_by_data_type(user_id['user_id'], rest=True)
             elif assembly is not None:
+                h5_idx = hdf5_reader(user_id['user_id'])
                 potential_files = h5_idx.get_files(assembly)
                 for f_in in potential_files:
                     files.append(dmp_api.get_file_by_id(f_in))
