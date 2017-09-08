@@ -406,6 +406,23 @@ class File(Resource):
                -H "Authorization: Bearer teststring" \
                -d @data.json http://localhost:5002/mug/api/dmp/file
 
+        To modify a column value (file size):
+
+        .. code-block:: none
+           :linenos:
+
+           echo '{
+               "type":"modify_column",
+               "file_id":"<file_id>",
+               "key":"<column_key>"
+               "value":"<new_value>"
+           }' > data.json
+
+           curl -X PUT
+               -H "Content-Type: application/json"   \
+               -H "Authorization: Bearer teststring" \
+               -d @data.json http://localhost:5002/mug/api/dmp/file
+
         """
         if user_id is not None:
             dmp_api = _get_dm_api()
@@ -422,9 +439,13 @@ class File(Resource):
             elif data_put['type'] == 'remove_meta':
                 for k in data_put['meta_data']:
                     result = dmp_api.remove_file_metadata(user_id['user_id'], file_id, k)
+            elif data_put['type'] == 'modify_column':
+                result = dmp_api.modify_column(
+                    user_id['user_id'], file_id, data_put['key'], data_put['value']
+                )
             else:
                 return help_usage('MissingMetaDataParameters', 400, params_required,
-                                  {'type' : ['add_meta', 'remove_meta']})
+                                  {'type' : ['add_meta', 'remove_meta', 'modify_column']})
             return result
 
         return help_usage('Forbidden', 403, [], {})
