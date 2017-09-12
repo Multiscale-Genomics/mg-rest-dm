@@ -273,7 +273,8 @@ class File(Resource):
                 Options of the compression level of the file. If file is not
                 compressed then do not include this parameter
             source_id : list
-                List of file_ids that were used for generating this file
+                List of file_ids that were used for generating this file.
+                If this is the root file then do not include this parameter.
             meta_data : dict
                 Hash array describing the relevant metadata for the file,
                 including the assembly if relevant
@@ -291,11 +292,12 @@ class File(Resource):
            echo '{
                "data_type": "RNA-seq",
                "file_type": "fastq",
-               "source_id": [],
                "meta_data": {
                    "assembly" : "GRCh38"
                }, "taxon_id": 9606,
-               "file_path": "/tmp/test/path/RNA-seq/testing_123.fastq"
+               "file_path": "/tmp/test/path/RNA-seq/testing_123.fastq",
+               "parent_dir" "/tmp/test/path/RNA-seq/",
+               "size": 64000,
            }' > data.json
 
            curl -X POST
@@ -311,6 +313,8 @@ class File(Resource):
             new_track = json.loads(request.data)
             file_path = new_track['file_path'] if 'file_path' in new_track else None
             file_type = new_track['file_type'] if 'file_type' in new_track else None
+            size = new_track['size'] if 'size' in new_track else None
+            parent_dir = new_track['parent_dir'] if 'parent_dir' in new_track else None
             data_type = new_track['data_type'] if 'data_type' in new_track else None
             taxon_id = new_track['taxon_id'] if 'taxon_id' in new_track else None
             source_id = new_track['source_id'] if 'source_id' in new_track else None
@@ -333,6 +337,8 @@ class File(Resource):
                 user_id['user_id'],
                 file_path,
                 file_type,
+                size,
+                parent_dir,
                 data_type,
                 taxon_id,
                 compressed,
