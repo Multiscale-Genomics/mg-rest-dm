@@ -43,7 +43,6 @@ def client(request):
 
     return client
 
-
 def _run_tests(details):
     """
     """
@@ -54,44 +53,54 @@ def _run_tests(details):
         print(file_meta)
         assert 'file_path' not in file_meta
 
-
-# users = ["adam", "ben", "chris", "denis", "eric", "test"]
 def test_tracks_01(client):
     """
     Test that specifying a user_id returns information
     """
-    rest_value = client.get('/mug/api/dmp/tracks?user_id=adam')
+    rest_value = client.get(
+        '/mug/api/dmp/files',
+        headers=dict(Authorization='Authorization: Bearer teststring')
+    )
     details = json.loads(rest_value.data)
     _run_tests(details)
 
-def test_tracks_02(client):
-    """
-    Test that specifying a user_id returns information
-    """
-    rest_value = client.get('/mug/api/dmp/tracks?user_id=ben')
-    details = json.loads(rest_value.data)
-    _run_tests(details)
+# users = ["adam", "ben", "chris", "denis", "eric", "test"]
+# def test_tracks_01(client):
+#     """
+#     Test that specifying a user_id returns information
+#     """
+#     rest_value = client.get('/mug/api/dmp/tracks?user_id=adam')
+#     details = json.loads(rest_value.data)
+#     _run_tests(details)
 
-def test_tracks_03(client):
-    """
-    Test that specifying a user_id returns information
-    """
-    rest_value = client.get('/mug/api/dmp/tracks?user_id=chris')
-    details = json.loads(rest_value.data)
-    _run_tests(details)
+# def test_tracks_02(client):
+#     """
+#     Test that specifying a user_id returns information
+#     """
+#     rest_value = client.get('/mug/api/dmp/tracks?user_id=ben')
+#     details = json.loads(rest_value.data)
+#     _run_tests(details)
 
-def test_tracks_04(client):
-    """
-    Test that specifying a user_id returns information
-    """
-    rest_value = client.get('/mug/api/dmp/tracks?user_id=denis')
-    details = json.loads(rest_value.data)
-    _run_tests(details)
+# def test_tracks_03(client):
+#     """
+#     Test that specifying a user_id returns information
+#     """
+#     rest_value = client.get('/mug/api/dmp/tracks?user_id=chris')
+#     details = json.loads(rest_value.data)
+#     _run_tests(details)
 
-def test_tracks_05(client):
-    """
-    Test that specifying a user_id returns information
-    """
-    rest_value = client.get('/mug/api/dmp/tracks?user_id=eric')
-    details = json.loads(rest_value.data)
-    _run_tests(details)
+# def test_tracks_04(client):
+#     """
+#     Test that specifying a user_id returns information
+#     """
+#     rest_value = client.get('/mug/api/dmp/tracks?user_id=denis')
+#     details = json.loads(rest_value.data)
+#     _run_tests(details)
+
+# def test_tracks_05(client):
+#     """
+#     Test that specifying a user_id returns information
+#     """
+#     rest_value = client.get('/mug/api/dmp/tracks?user_id=eric')
+#     details = json.loads(rest_value.data)
+#     _run_tests(details)

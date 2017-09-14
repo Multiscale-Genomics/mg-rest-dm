@@ -48,13 +48,20 @@ def test_track_history_01(client):
     """
     Due to authentication this users the test user
     """
-    rest_value = client.get('/mug/api/dmp/files')
+    rest_value = client.get(
+        '/mug/api/dmp/files',
+        headers=dict(Authorization='Authorization: Bearer teststring')
+    )
     results = json.loads(rest_value.data)
+    print(results)
     #_run_tests(results)
 
     for result in results['files']:
         print(result['_id'])
-        rest_value = client.get('/mug/api/dmp/fileHistory?file_id=' + result['_id'])
+        rest_value = client.get(
+            '/mug/api/dmp/fileHistory?file_id=' + result['_id'],
+            headers=dict(Authorization='Authorization: Bearer teststring')
+        )
         history_results = json.loads(rest_value.data)
         print(history_results)
 

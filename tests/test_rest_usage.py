@@ -47,9 +47,11 @@ def test_endpoints(client):
     """
     Test that the root endpoint is returning the expected keys
     """
-    rest_value = client.get('/mug/api/dmp')
+    rest_value = client.get(
+        '/mug/api/dmp'
+    )
     details = json.loads(rest_value.data)
-    #print(details)
+    # print(details)
     assert '_links' in details
 
 def test_ping(client):
@@ -65,18 +67,24 @@ def test_track(client):
     """
     Test that the track endpoint is returning the usage paramerts
     """
-    rest_value = client.get('/mug/api/dmp/track')
+    rest_value = client.get(
+        '/mug/api/dmp/file',
+        headers=dict(Authorization='Authorization: Bearer teststring')
+    )
     details = json.loads(rest_value.data)
-    #print(details)
+    # print(details)
     assert 'usage' in details
 
 def test_tracks(client):
     """
     Test that the tracks endpoint is returning the usage paramerts
     """
-    rest_value = client.get('/mug/api/dmp/tracks')
+    rest_value = client.get(
+        '/mug/api/dmp/files',
+        headers=dict(Authorization='Authorization: Bearer teststring')
+    )
     details = json.loads(rest_value.data)
-    #print(details)
+    # print(details)
     assert 'usage' in details
     assert len(details['usage']['parameters']) is not 0
 
@@ -84,7 +92,10 @@ def test_trackhistory(client):
     """
     Test that the tracks endpoint is returning the usage paramerts
     """
-    rest_value = client.get('/mug/api/dmp/trackHistory')
+    rest_value = client.get(
+        '/mug/api/dmp/fileHistory',
+        headers=dict(Authorization='Authorization: Bearer teststring')
+    )
     details = json.loads(rest_value.data)
-    print(details)
+    # print(details)
     assert 'usage' in details

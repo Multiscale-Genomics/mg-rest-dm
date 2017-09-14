@@ -65,15 +65,19 @@ def help_usage(error_message, status_code,
         JSON formated status message to display to the user
     """
     parameters = {
-        'file_id' : ['File ID', 'str', 'REQUIRED'],
-        'region' : ['Chromosome:Start:End', 'str:int:int', 'OPTIONAL'],
-        'file_type' : ['File type (bb, bw, tsv, fasta, fastq, ...)', 'str', 'OPTIONAL'],
-        'data_type' : ['Data type (chip-seq, rna-seq, wgbs, ...)', 'str', 'OPTIONAL'],
-        'assembly' : ['Assembly', 'str', 'REQUIRED'],
-        'chrom' : ['Chromosome', 'str', 'OPTIONAL'],
-        'start' : ['Start', 'int', 'OPTIONAL'],
-        'end' : ['End', 'int', 'OPTIONAL'],
-        'type' : ['add_meta|remove_meta', 'str', 'OPTIONAL']
+        'by_user': ['By User [0|1]', 'int', 'OPTIONAL'],
+        'file_id': ['File ID', 'str', 'REQUIRED'],
+        'region': ['Chromosome:Start:End', 'str:int:int', 'OPTIONAL'],
+        'file_type': ['File type (bb, bw, tsv, fasta, fastq, ...)', 'str', 'OPTIONAL'],
+        'data_type': ['Data type (chip-seq, rna-seq, wgbs, ...)', 'str', 'OPTIONAL'],
+        'assembly': ['Assembly', 'str', 'REQUIRED'],
+        'chrom': ['Chromosome', 'str', 'OPTIONAL'],
+        'start': ['Start', 'int', 'OPTIONAL'],
+        'end': ['End', 'int', 'OPTIONAL'],
+        'type': ['add_meta|remove_meta', 'str', 'OPTIONAL'],
+        'output': [
+            "Default is None. State 'original' to return the original whole file",
+            'str', 'OPTIONAL'],
     }
 
     used_param = {k : parameters[k] for k in parameters_required if k in parameters}
@@ -186,15 +190,15 @@ class File(Resource):
         region = request.args.get('region')
         output = request.args.get('output')
 
-        params = [user_id, file_id]
+        params = [file_id]
 
         # Display the parameters available
         if sum([x is None for x in params]) == len(params):
-            return help_usage(None, 200, ['file_id'], {})
+            return help_usage(None, 200, ['file_id', 'region', 'output'], {})
 
         # ERROR - one of the required parameters is NoneType
         if sum([x is not None for x in params]) != len(params):
-            return help_usage('MissingParameters', 400, ['file_id'], user_id)
+            return help_usage('MissingParameters', 400, ['file_id'], {})
 
         if user_id is not None:
             dmp_api = _get_dm_api()
@@ -307,7 +311,6 @@ class File(Resource):
 
         """
         if user_id is not None:
-            print("USER_ID:", user_id['user_id'])
             dmp_api = _get_dm_api()
 
             new_track = json.loads(request.data)
@@ -540,15 +543,17 @@ class Files(Resource):
             assembly = request.args.get('assembly')
             file_type = request.args.get('file_type')
             data_type = request.args.get('data_type')
+            by_user = request.args.get('by_user')
 
-            print("USER ID:", user_id)
             dmp_api = _get_dm_api()
 
             params = [user_id]
 
             # Display the parameters available
             if sum([x is None for x in params]) == len(params):
-                return help_usage(None, 200, [], {})
+                return help_usage(
+                    None, 200,
+                    ['region', 'assembly', 'file_type', 'data_type', 'by_user'], {})
 
             files = []
             if region is not None and assembly is not None:
@@ -559,8 +564,12 @@ class Files(Resource):
                 files = dmp_api.get_files_by_data_type(user_id['user_id'], rest=True)
             elif assembly is not None:
                 files = dmp_api.get_files_by_assembly(user_id['user_id'], assembly, rest=True)
-            else:
+            elif by_user is not None and int(by_user) == 1:
                 files = dmp_api.get_files_by_user(user_id['user_id'], rest=True)
+            else:
+                return help_usage(
+                    None, 200,
+                    ['region', 'assembly', 'file_type', 'data_type', 'by_user'], {})
 
             return {
                 '_links': {
@@ -570,7 +579,9 @@ class Files(Resource):
                 'files': files
             }
 
-        return help_usage(None, 200, [], {})
+        return help_usage(
+            None, 200,
+            ['region', 'assembly', 'file_type', 'data_type', 'by_user'], {})
 
     def _get_all_files_region(self, dmp_api, user_id, assembly, region):
         files = []
@@ -617,7 +628,6 @@ class FileHistory(Resource):
             if sum([x is not None for x in params]) != len(params):
                 return help_usage('MissingParameters', 400, [],
                                   {
-                                      'user_id' : user_id['user_id'],
                                       'file_id' : file_id
                                   })
 
