@@ -44,7 +44,7 @@ def client(request):
     return client
 
 
-def test_track_history_01(client):
+def test_file_history_01(client):
     """
     Due to authentication this users the test user
     """

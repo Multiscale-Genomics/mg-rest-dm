@@ -43,7 +43,7 @@ def client(request):
 
     return client
 
-def test_track(client):
+def test_file(client):
     """
     Test that the track endpoint is returning the usage paramerts
     """
@@ -55,7 +55,7 @@ def test_track(client):
     print(details)
     assert 'usage' in details
 
-def test_track_01(client):
+def test_file_01(client):
     """
     Test that the track endpoint is returning data when a user_id is specified
     and that there are no locations

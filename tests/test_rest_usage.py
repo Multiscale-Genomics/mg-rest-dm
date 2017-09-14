@@ -63,7 +63,7 @@ def test_ping(client):
     #print(details)
     assert 'status' in details
 
-def test_track(client):
+def test_file(client):
     """
     Test that the track endpoint is returning the usage paramerts
     """
@@ -75,7 +75,7 @@ def test_track(client):
     # print(details)
     assert 'usage' in details
 
-def test_tracks(client):
+def test_files(client):
     """
     Test that the tracks endpoint is returning the usage paramerts
     """
@@ -88,7 +88,7 @@ def test_tracks(client):
     assert 'usage' in details
     assert len(details['usage']['parameters']) is not 0
 
-def test_trackhistory(client):
+def test_filehistory(client):
     """
     Test that the tracks endpoint is returning the usage paramerts
     """
