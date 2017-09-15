@@ -210,7 +210,7 @@ class File(Resource):
                     self._output_generate(file_obj['file_path']),
                     mimetype='text/text'
                 )
-            else:
+            elif region is not None:
                 chrom, start, end = region.split(':')
 
                 params = [file_id, chrom, start, end]
@@ -235,6 +235,8 @@ class File(Resource):
                 resp.headers["Content-Type"] = "text"
 
                 return resp
+
+            return help_usage('MissingParameters', 400, ['file_id', 'region', 'output'], {})
 
         return help_usage('Forbidden', 403, ['file_id'], {})
 
