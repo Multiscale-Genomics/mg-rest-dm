@@ -242,10 +242,13 @@ class File(Resource):
         """
         Function to iterate through a file and stream it back to the user
         """
-        with open(file_path, 'rb') as f_strm:
-            #for chunk in iter(lambda: f_strm.read(4096), b''):
-            for chunk in iter(lambda: f_strm.read(64), b''):
-                yield chunk
+        if os.path.isfile(file_path):
+            with open(file_path, 'rb') as f_strm:
+                #for chunk in iter(lambda: f_strm.read(4096), b''):
+                for chunk in iter(lambda: f_strm.read(64), b''):
+                    yield chunk
+        else:
+            yield ""
 
     @authorized
     def post(self, user_id):
