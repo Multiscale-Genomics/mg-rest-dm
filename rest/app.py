@@ -205,7 +205,7 @@ class File(Resource):
 
             file_obj = dmp_api.get_file_by_id(user_id['user_id'], file_id)
 
-            if file_obj is None or 'file_path' is not in file_obj:
+            if file_obj is None or 'file_path' not in file_obj:
                 return help_usage('MissingParameters', 400, ['file_id', 'region', 'output'], {})
 
             if output is not None and output == 'original':
