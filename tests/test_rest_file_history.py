@@ -49,7 +49,7 @@ def test_file_history_01(client):
     Due to authentication this users the test user
     """
     rest_value = client.get(
-        '/mug/api/dmp/files',
+        '/mug/api/dmp/files?by_user=1',
         headers=dict(Authorization='Authorization: Bearer teststring')
     )
     results = json.loads(rest_value.data)

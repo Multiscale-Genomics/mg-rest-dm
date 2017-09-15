@@ -70,8 +70,9 @@ def test_file_02(client):
 
     for entry in details['files']:
         rest_value = client.get(
-            '/mug/api/dmp/file?region=19:300500:300800&file_id=' + str(entry['_id']),
+            '/mug/api/dmp/file?output=original&file_id=' + str(entry['_id']),
             headers=dict(Authorization='Authorization: Bearer teststring')
         )
-        rows = json.loads(rest_value.data)
-        print(rows)
+
+        assert rest_value.status_code == 200
+
