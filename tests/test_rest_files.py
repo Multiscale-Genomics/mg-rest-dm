@@ -62,4 +62,17 @@ def test_files_01(client):
         headers=dict(Authorization='Authorization: Bearer teststring')
     )
     details = json.loads(rest_value.data)
+
+    assert 'usage' in details
+
+def test_files_02(client):
+    """
+    Test that specifying a user_id returns information
+    """
+    rest_value = client.get(
+        '/mug/api/dmp/files?by_user=1',
+        headers=dict(Authorization='Authorization: Bearer teststring')
+    )
+    details = json.loads(rest_value.data)
+    print(details)
     _run_tests(details)

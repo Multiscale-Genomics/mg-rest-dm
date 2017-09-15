@@ -43,7 +43,7 @@ def client(request):
 
     return client
 
-def test_file(client):
+def test_file_01(client):
     """
     Test that the track endpoint is returning the usage paramerts
     """
@@ -52,19 +52,26 @@ def test_file(client):
         headers=dict(Authorization='Authorization: Bearer teststring')
     )
     details = json.loads(rest_value.data)
-    print(details)
+    # print(details)
     assert 'usage' in details
 
-def test_file_01(client):
+def test_file_02(client):
     """
     Test that the track endpoint is returning data when a user_id is specified
     and that there are no locations
     """
 
     rest_value = client.get(
-        '/mug/api/dmp/file?region=19:300500:300800&file_id=59956f2bd9422a4c268719f9',
+        '/mug/api/dmp/files?by_user=1',
         headers=dict(Authorization='Authorization: Bearer teststring')
     )
     details = json.loads(rest_value.data)
-    #print(details)
-    assert 'usage' in details
+    # print("DETAILS:", details)
+
+    for entry in details['files']:
+        rest_value = client.get(
+            '/mug/api/dmp/file?region=19:300500:300800&file_id=' + str(entry['_id']),
+            headers=dict(Authorization='Authorization: Bearer teststring')
+        )
+        rows = json.loads(rest_value.data)
+        print(rows)
