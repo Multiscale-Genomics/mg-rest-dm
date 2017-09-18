@@ -40,8 +40,9 @@ port = 27017
 user = testuser
 pass = test123
 db = dmp
-ftp_root = ftp://ftp.multiscalegenomics.eu/test
 ```
+
+Customise the `rest/auth_meta.json` file to locate the authentication server
 
 # Setting up a server
 ```

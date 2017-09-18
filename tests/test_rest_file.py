@@ -75,4 +75,3 @@ def test_file_02(client):
         )
 
         assert rest_value.status_code == 200
-

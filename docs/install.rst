@@ -69,8 +69,9 @@ define the MongoDB server:
    user = testuser
    pass = test123
    db = dmp
-   ftp_root = ftp://ftp.multiscalegenomics.eu/test
 
+
+Customise the `rest/auth_meta.json` file to locate the authentication server
 
 Starting the service:
 
