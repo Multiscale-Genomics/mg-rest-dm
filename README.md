@@ -22,6 +22,7 @@ git clone https://github.com/Multiscale-Genomics/mg-rest-dm.git
 To get this to be picked up by pip if part of a webserver then:
 ```
 pip install --editable .
+pip install -r requirements.txt
 ```
 This should install the required packages listed in the `setup.py` script.
 

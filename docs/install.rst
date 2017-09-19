@@ -34,6 +34,7 @@ Directly from GitHub:
    git clone https://github.com/Multiscale-Genomics/mg-rest-dm.git
    cd mg-rest-dm/
    pip install -e .
+   pip install -r requirements.txt
 
 Using pip:
 
