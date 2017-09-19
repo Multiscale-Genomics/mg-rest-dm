@@ -102,8 +102,13 @@ def help_usage(error_message, status_code,
 
     return message
 
-def _get_dm_api():
+def _get_dm_api(user_id=None):
     cnf_loc = os.path.dirname(os.path.abspath(__file__)) + '/mongodb.cnf'
+
+    if user_id == 'test':
+        print("TEST USER DM API")
+        return dmp(cnf_loc, test=True)
+
     if os.path.isfile(cnf_loc) is True:
         print("LIVE DM API")
         return dmp(cnf_loc)
@@ -553,8 +558,6 @@ class Files(Resource):
             data_type = request.args.get('data_type')
             by_user = request.args.get('by_user')
 
-            dmp_api = _get_dm_api()
-
             params = [user_id]
 
             # Display the parameters available
@@ -562,6 +565,8 @@ class Files(Resource):
                 return help_usage(
                     None, 200,
                     ['region', 'assembly', 'file_type', 'data_type', 'by_user'], {})
+
+            dmp_api = _get_dm_api(user_id['user_id'])
 
             files = []
             if region is not None and assembly is not None:
