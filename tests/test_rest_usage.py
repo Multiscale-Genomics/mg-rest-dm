@@ -68,7 +68,7 @@ def test_file(client):
     Test that the track endpoint is returning the usage paramerts
     """
     rest_value = client.get(
-        '/mug/api/dmp/file',
+        '/mug/api/dmp/file_meta',
         headers=dict(Authorization='Authorization: Bearer teststring')
     )
     details = json.loads(rest_value.data)

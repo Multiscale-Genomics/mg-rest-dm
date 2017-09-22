@@ -48,7 +48,7 @@ def test_file_01(client):
     Test that the track endpoint is returning the usage paramerts
     """
     rest_value = client.get(
-        '/mug/api/dmp/file',
+        '/mug/api/dmp/file_meta',
         headers=dict(Authorization='Authorization: Bearer teststring')
     )
     details = json.loads(rest_value.data)
@@ -61,17 +61,18 @@ def test_file_02(client):
     and that there are no locations
     """
 
-    rest_value = client.get(
-        '/mug/api/dmp/files?by_user=1',
-        headers=dict(Authorization='Authorization: Bearer teststring')
-    )
-    details = json.loads(rest_value.data)
-    # print("DETAILS:", details)
+    file_ids = [
+        'testtest0000', 'testtest0001', 'testtest0002', 'testtest0003'
+    ]
 
-    for entry in details['files']:
+    for file_id in file_ids:
+        print("\n", file_id, "\n ============")
         rest_value = client.get(
-            '/mug/api/dmp/file?output=original&file_id=' + str(entry['_id']),
+            '/mug/api/dmp/file_meta?file_id=' + str(file_id),
             headers=dict(Authorization='Authorization: Bearer teststring')
         )
 
+        print(rest_value.status_code, rest_value.data[0:20])
+
+        assert len(rest_value.data) > 0
         assert rest_value.status_code == 200
