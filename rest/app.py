@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import json
 import os
+import sys
 #import logging
 
 from flask import Flask, Response, request, make_response
@@ -30,7 +31,7 @@ from reader.bigwig import bigwig_reader
 #from reader.tabix import tabix_reader
 from reader.hdf5_reader import hdf5_reader
 
-from rest.mg_auth import authorized
+from mg_rest_util.mg_auth import authorized
 
 APP = Flask(__name__)
 #logging.basicConfig()
@@ -148,7 +149,7 @@ class EndPoints(Resource):
         }
 
 
-class File(Resource):
+class FileMeta(Resource):
     """
     Class to handle the http requests for retrieving the data from a file.
     This class is able to handle big[Bed|Wig] file and serve back the matching
@@ -172,10 +173,6 @@ class File(Resource):
             User ID
         file_id : str
             Identifier of the file to retrieve data from
-        region : str
-            <chromosome>:<start_pos>:<end_pos>
-        output : str
-            Default is None. State 'original' to return the original whole file
 
         Returns
         -------
@@ -192,59 +189,20 @@ class File(Resource):
 
         """
         file_id = request.args.get('file_id')
-        region = request.args.get('region')
-        output = request.args.get('output')
 
         params = [file_id]
 
         # Display the parameters available
         if sum([x is None for x in params]) == len(params):
-            return help_usage(None, 200, ['file_id', 'region', 'output'], {})
+            return help_usage(None, 200, ['file_id'], {})
 
         # ERROR - one of the required parameters is NoneType
         if sum([x is not None for x in params]) != len(params):
             return help_usage('MissingParameters', 400, ['file_id'], {})
 
         if user_id is not None:
-            dmp_api = _get_dm_api()
-
-            file_obj = dmp_api.get_file_by_id(user_id['user_id'], file_id)
-
-            if file_obj is None or 'file_path' not in file_obj:
-                return help_usage('MissingParameters', 400, ['file_id', 'region', 'output'], {})
-
-            if output is not None and output == 'original':
-                return Response(
-                    self._output_generate(file_obj['file_path']),
-                    mimetype='text/text'
-                )
-            elif region is not None:
-                chrom, start, end = region.split(':')
-
-                params = [file_id, chrom, start, end]
-
-                # Display the parameters available
-                if sum([x is None for x in params]) == len(params):
-                    return help_usage(None, 200, params, {})
-
-                output_str = ''
-                if file_obj['file_type'] in ['bed', 'bb']:
-                    reader = bigbed_reader(file_obj['file_path'])
-                    output_str = reader.get_range(chrom, start, end, 'bed')
-                elif file_obj['file_type'] in ['wig', 'bw']:
-                    print(chrom, start, end, 'wig')
-                    reader = bigwig_reader(file_obj['file_path'])
-                    output_str = reader.get_range(chrom, start, end, 'wig')
-                # elif file_obj['file_type'] in ['gff3', 'tsv', 'tbi']:
-                #     reader = tabix_reader(file_obj['file_path'])
-                #     output_str = reader.get_range(chrom, start, end, 'gff3')
-
-                resp = make_response(output_str, 'application/tsv')
-                resp.headers["Content-Type"] = "text"
-
-                return resp
-
-            return help_usage('MissingParameters', 400, ['file_id', 'region', 'output'], {})
+            dmp_api = _get_dm_api(user_id['user_id'])
+            return dmp_api.get_file_by_id(user_id['user_id'], file_id, True)
 
         return help_usage('Forbidden', 403, ['file_id'], {})
 
@@ -324,7 +282,7 @@ class File(Resource):
 
         """
         if user_id is not None:
-            dmp_api = _get_dm_api()
+            dmp_api = _get_dm_api(user_id['user_id'])
 
             new_track = json.loads(request.data)
             file_path = new_track['file_path'] if 'file_path' in new_track else None
@@ -447,7 +405,7 @@ class File(Resource):
 
         """
         if user_id is not None:
-            dmp_api = _get_dm_api()
+            dmp_api = _get_dm_api(user_id['user_id'])
 
             data_put = json.loads(request.data)
             file_id = data_put['file_id']
@@ -506,7 +464,7 @@ class File(Resource):
 
         """
         if user_id is not None:
-            dmp_api = _get_dm_api()
+            dmp_api = _get_dm_api(user_id['user_id'])
 
             params_required = ['user_id', 'file_id']
             data_delete = json.loads(request.data)
@@ -627,7 +585,7 @@ class FileHistory(Resource):
            curl -X GET http://localhost:5002/mug/api/dmp/trackHistory?file_id=<file_id>
         """
         if user_id is not None:
-            dmp_api = _get_dm_api()
+            dmp_api = _get_dm_api(user_id['user_id'])
 
             file_id = request.args.get('file_id')
 
@@ -697,6 +655,7 @@ class Ping(Resource):
 # things can be redirected to the raw files for use as a track.
 #
 
+sys._auth_meta_json = os.path.dirname(os.path.realpath(__file__)) + '/auth_meta.json'
 
 # Define the URIs and their matching methods
 REST_API = Api(APP)
@@ -705,7 +664,7 @@ REST_API = Api(APP)
 REST_API.add_resource(EndPoints, "/mug/api/dmp", endpoint='dmp_root')
 
 #   Get the data for a specific track
-REST_API.add_resource(File, "/mug/api/dmp/file", endpoint='file')
+REST_API.add_resource(FileMeta, "/mug/api/dmp/file_meta", endpoint='file_meta')
 
 #   List the available species for which there are datasets available
 REST_API.add_resource(Files, "/mug/api/dmp/files", endpoint='files')
