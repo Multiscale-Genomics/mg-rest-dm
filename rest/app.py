@@ -22,7 +22,7 @@ import os
 import sys
 #import logging
 
-from flask import Flask, Response, request
+from flask import Flask, request
 from flask_restful import Api, Resource
 
 from dmp import dmp
