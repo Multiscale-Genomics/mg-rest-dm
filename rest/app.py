@@ -22,13 +22,10 @@ import os
 import sys
 #import logging
 
-from flask import Flask, Response, request, make_response
+from flask import Flask, Response, request
 from flask_restful import Api, Resource
 
 from dmp import dmp
-from reader.bigbed import bigbed_reader
-from reader.bigwig import bigwig_reader
-#from reader.tabix import tabix_reader
 from reader.hdf5_reader import hdf5_reader
 
 from mg_rest_util.mg_auth import authorized
