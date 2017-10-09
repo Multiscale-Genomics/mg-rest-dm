@@ -20,6 +20,8 @@ from __future__ import print_function
 import os
 import tempfile
 import json
+import bson
+from bson.objectid import ObjectId
 import pytest
 
 from context import app
@@ -72,8 +74,7 @@ def test_file_02(client):
             headers=dict(Authorization='Authorization: Bearer teststring')
         )
 
-        print(rest_value.status_code, rest_value.data[0:20])
-
-        print(rest_value.data)
-        #assert len(rest_value.data) > 0
-        #assert rest_value.status_code == 200
+        details = json.loads(rest_value.data)
+        print(rest_value.status_code, details["_id"])
+        print("ObjectId:", str(ObjectId(str(file_id))))
+        assert str(details["_id"]) == str(ObjectId(str(file_id)))

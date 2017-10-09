@@ -139,7 +139,7 @@ class EndPoints(Resource):
                 '_self': request.base_url,
                 '_getFile': request.url_root + 'mug/api/dmp/file',
                 '_getFiles': request.url_root + 'mug/api/dmp/files',
-                '_getFileHistory': request.url_root + 'mug/api/dmp/fileHistory',
+                '_getFileHistory': request.url_root + 'mug/api/dmp/file_history',
                 '_ping': request.url_root + 'mug/api/dmp/ping',
                 '_parent': request.url_root + 'mug/api'
             }
@@ -182,7 +182,7 @@ class FileMeta(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X GET http://localhost:5002/mug/api/dmp/track?file_id=test_file&region=1:1000:2000
+           curl -X GET http://localhost:5002/mug/api/dmp/track?file_id=test_file
 
         """
         file_id = request.args.get('file_id')
@@ -202,18 +202,6 @@ class FileMeta(Resource):
             return dmp_api.get_file_by_id(user_id['user_id'], file_id, True)
 
         return help_usage('Forbidden', 403, ['file_id'], {})
-
-    def _output_generate(self, file_path):
-        """
-        Function to iterate through a file and stream it back to the user
-        """
-        if os.path.isfile(file_path):
-            with open(file_path, 'rb') as f_strm:
-                #for chunk in iter(lambda: f_strm.read(4096), b''):
-                for chunk in iter(lambda: f_strm.read(64), b''):
-                    yield chunk
-        else:
-            yield ""
 
     @authorized
     def post(self, user_id):
@@ -579,7 +567,7 @@ class FileHistory(Resource):
         .. code-block:: none
            :linenos:
 
-           curl -X GET http://localhost:5002/mug/api/dmp/trackHistory?file_id=<file_id>
+           curl -X GET http://localhost:5002/mug/api/dmp/file_history?file_id=<file_id>
         """
         if user_id is not None:
             dmp_api = _get_dm_api(user_id['user_id'])
@@ -667,7 +655,7 @@ REST_API.add_resource(FileMeta, "/mug/api/dmp/file_meta", endpoint='file_meta')
 REST_API.add_resource(Files, "/mug/api/dmp/files", endpoint='files')
 
 #   List file history
-REST_API.add_resource(FileHistory, "/mug/api/dmp/fileHistory", endpoint='fileHistory')
+REST_API.add_resource(FileHistory, "/mug/api/dmp/file_history", endpoint='file_history')
 
 #   Service ping
 REST_API.add_resource(Ping, "/mug/api/dmp/ping", endpoint='dmp-ping')
