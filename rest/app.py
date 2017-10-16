@@ -199,7 +199,7 @@ class FileMeta(Resource):
 
         if user_id is not None:
             dmp_api = _get_dm_api(user_id['user_id'])
-            return dmp_api.get_file_by_id(user_id['user_id'], file_id, True)
+            return dmp_api.get_file_by_id(user_id['user_id'], file_id)
 
         return help_usage('Forbidden', 403, ['file_id'], {})
 
@@ -515,13 +515,13 @@ class Files(Resource):
             if region is not None and assembly is not None:
                 files = self._get_all_files_region(dmp_api, user_id['user_id'], assembly, region)
             elif file_type is not None and assembly is not None:
-                files = dmp_api.get_files_by_file_type(user_id['user_id'], rest=True)
+                files = dmp_api.get_files_by_file_type(user_id['user_id'])
             elif data_type is not None and assembly is not None:
-                files = dmp_api.get_files_by_data_type(user_id['user_id'], rest=True)
+                files = dmp_api.get_files_by_data_type(user_id['user_id'])
             elif assembly is not None:
-                files = dmp_api.get_files_by_assembly(user_id['user_id'], assembly, rest=True)
+                files = dmp_api.get_files_by_assembly(user_id['user_id'], assembly)
             elif by_user is not None and int(by_user) == 1:
-                files = dmp_api.get_files_by_user(user_id['user_id'], rest=True)
+                files = dmp_api.get_files_by_user(user_id['user_id'])
             else:
                 return help_usage(
                     None, 200,
