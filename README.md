@@ -1,7 +1,7 @@
 # mg-rest-dm
 RESTful access to the DMP
 
-[![Documentation Status](https://readthedocs.org/projects/mg-rest-dm/badge/?version=latest)](http://mg-rest-dm.readthedocs.org/en/latest/) [![Build Status](https://travis-ci.org/Multiscale-Genomics/mg-rest-dm.svg?branch=master)](https://travis-ci.org/Multiscale-Genomics/mg-rest-dm)
+[![Documentation Status](https://readthedocs.org/projects/mg-rest-dm/badge/?version=latest)](http://mg-rest-dm.readthedocs.org/en/latest/) [![Build Status](https://travis-ci.org/Multiscale-Genomics/mg-rest-dm.svg?branch=master)](https://travis-ci.org/Multiscale-Genomics/mg-rest-dm) [![Code Health](https://landscape.io/github/Multiscale-Genomics/mg-rest-dm/master/landscape.svg?style=flat)](https://landscape.io/github/Multiscale-Genomics/mg-rest-dm/master)
 
 # Requirements
 - Mongo DB 3.2
