@@ -93,7 +93,7 @@ def test_filehistory(client):
     Test that the tracks endpoint is returning the usage paramerts
     """
     rest_value = client.get(
-        '/mug/api/dmp/fileHistory',
+        '/mug/api/dmp/file_history',
         headers=dict(Authorization='Authorization: Bearer teststring')
     )
     details = json.loads(rest_value.data)

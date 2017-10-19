@@ -53,16 +53,16 @@ def test_file_history_01(client):
         headers=dict(Authorization='Authorization: Bearer teststring')
     )
     results = json.loads(rest_value.data)
-    print(results)
+    # print(results)
     #_run_tests(results)
 
     for result in results['files']:
-        print(result['_id'])
+        print("file_id", result['_id'])
         rest_value = client.get(
-            '/mug/api/dmp/fileHistory?file_id=' + result['_id'],
+            '/mug/api/dmp/file_history?file_id=' + result['_id'],
             headers=dict(Authorization='Authorization: Bearer teststring')
         )
         history_results = json.loads(rest_value.data)
-        print(history_results)
+        print("HISTORY RESULTS:", history_results)
 
         assert 'history_files' in history_results
