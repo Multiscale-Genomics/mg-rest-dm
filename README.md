@@ -9,7 +9,7 @@ RESTful access to the DMP
 - pyenv
 - pyenv virtualenv
 - Python Modules:
-  - DMP
+  - mg-dm-api
   - Flask
   - Flask-Restful
   - Waitress

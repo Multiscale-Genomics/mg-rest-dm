@@ -166,8 +166,6 @@ class FileMeta(Resource):
 
         Parameters
         ----------
-        user_id : str
-            User ID
         file_id : str
             Identifier of the file to retrieve data from
 
@@ -433,8 +431,6 @@ class FileMeta(Resource):
         ----------
         This should be passed as the data block with the HTTP request:
         json : dict
-            user_id : str
-                User identifier
             file_id : str
                 ID of the stored file
 

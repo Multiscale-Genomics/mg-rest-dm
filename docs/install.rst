@@ -87,7 +87,7 @@ Test scripts are located in the `test/` directory. Run `pytest` to from the root
 repository directory to ensure that the API is working correctly.
 
 The scripts require a valid hdf5 file generated using the scripts from
-mg-storage-hdf5 and a matching datasets.json file located in the `rest/`
+mg-dm-api and a matching datasets.json file located in the `rest/`
 directory
 
 Documentation

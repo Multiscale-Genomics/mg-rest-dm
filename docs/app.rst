@@ -8,7 +8,7 @@ mg-rest-dm server
    .. autoclass:: rest.app.EndPoints
       :members:
 
-   .. autoclass:: rest.app.File
+   .. autoclass:: rest.app.FileMeta
       :members:
 
    .. autoclass:: rest.app.Files
