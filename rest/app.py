@@ -267,8 +267,8 @@ class FileMeta(Resource):
            }' > data.json
 
            curl -X POST
-               -H "Content-Type: application/json"   \
-               -H "Authorization: Bearer teststring" \
+               -H "Content-Type: application/json"
+               -H "Authorization: Bearer teststring"
                -d @data.json http://localhost:5002/mug/api/dmp/file
 
         """
@@ -357,8 +357,8 @@ class FileMeta(Resource):
            }' > data.json
 
            curl -X PUT
-               -H "Content-Type: application/json"   \
-               -H "Authorization: Bearer teststring" \
+               -H "Content-Type: application/json"
+               -H "Authorization: Bearer teststring"
                -d @data.json http://localhost:5002/mug/api/dmp/file
 
         To remove a key value pair:
@@ -373,8 +373,8 @@ class FileMeta(Resource):
            }' > data.json
 
            curl -X PUT
-               -H "Content-Type: application/json"   \
-               -H "Authorization: Bearer teststring" \
+               -H "Content-Type: application/json"
+               -H "Authorization: Bearer teststring"
                -d @data.json http://localhost:5002/mug/api/dmp/file
 
         To modify a column value (file size):
@@ -390,8 +390,8 @@ class FileMeta(Resource):
            }' > data.json
 
            curl -X PUT
-               -H "Content-Type: application/json"   \
-               -H "Authorization: Bearer teststring" \
+               -H "Content-Type: application/json"
+               -H "Authorization: Bearer teststring"
                -d @data.json http://localhost:5002/mug/api/dmp/file
 
         """
@@ -447,8 +447,8 @@ class FileMeta(Resource):
            }' > data.json
 
            curl -X DELETE
-               -H "Content-Type: application/json"   \
-               -H "Authorization: Bearer teststring" \
+               -H "Content-Type: application/json"
+               -H "Authorization: Bearer teststring"
                -d @data.json http://localhost:5002/mug/api/dmp/file
 
         """

@@ -27,7 +27,7 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return MagicMock()
 
-MOCK_MODULES = ['pyBigWig', 'dmp']
+MOCK_MODULES = ['pyBigWig', 'dmp', 'reader']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ------------------------------------------------
@@ -168,6 +168,3 @@ texinfo_documents = [
      author, 'mg-rest-dm', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-
