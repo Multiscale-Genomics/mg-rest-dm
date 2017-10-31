@@ -17,6 +17,9 @@
 
 from __future__ import print_function
 
+# Required for ReadTheDocs
+from functools import wraps # pylint: disable=unused-import
+
 import json
 import os
 import sys
